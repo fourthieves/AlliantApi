@@ -45,7 +45,7 @@ def get_application_layers(base_url, system_layer):
 #################################################################################################
 
 
-class AlliantApiResponse():
+class AlliantApiResponse:
 
     def __init__(self, response):
 
@@ -94,6 +94,7 @@ class AlliantApiResponse():
                 f'  {self.request.body = }\n'
                 f'  {self.warnings = }'
             )
+
 
 @dataclass
 class RequestFormat:
@@ -422,7 +423,7 @@ class Client:
         :param guid: This is the guid of the resource
         :param action: The action to be performed.  available actions are: approve, clear, clearRequest, copy,
             insetup, post
-        :param comment: some of the
+        :param comment: some of the actions require a comment, if required, this should be entered here.
         :return:
         """
 

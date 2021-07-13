@@ -34,6 +34,8 @@ class AlliantApi(Client):
             response = super().delete_contract(guid)
             print(response.status_code, response.result)
             if response.status_code == 200:
-                print(f"{guid} - Successfully deleted")
+                return f"{guid} - Successfully deleted"
             else:
-                print(f"{guid} - Error - {response.errors}")
+                return f"{guid} - Error - {response.errors}"
+
+        return f"{guid} - {response.contract_status} not deleted"
