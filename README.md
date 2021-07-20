@@ -67,11 +67,11 @@ application_layer = 'test'
 
 
 with AlliantApi(base_url,
-              user_id=user_id,
-              password=password,
-              system_layer_key=system_layer_key,
-              application_layer=application_layer
-              ) as aa:
+               user_id=user_id,
+               password=password,
+               system_layer_key=system_layer_key,
+               application_layer=application_layer
+               ) as aa:
 
     print(f"{aa.token = }  {aa.token_expires = }")
 ```
@@ -108,11 +108,11 @@ application_layer = 'test'
 
 
 aa = AlliantApi(base_url,
-              user_id=user_id,
-              password=password,
-              system_layer_key=system_layer_key,
-              application_layer=application_layer
-              )
+               user_id=user_id,
+               password=password,
+               system_layer_key=system_layer_key,
+               application_layer=application_layer
+               )
 
 aa.login()
 
@@ -125,4 +125,7 @@ print(aa.logout())
 There have been a number of methods written to directly interact with the various endpoints.
 
 ## Transaction Characteristics
+### lookup_user_x_collection(tc_number, number_of_records=20)
 
+
+``

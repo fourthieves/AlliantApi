@@ -12,7 +12,15 @@ from dataclasses import dataclass
 #################################################################################################
 
 
-def format_base_url(base_url):
+def format_base_url(base_url) -> str:
+    """
+    Takes a base url and applies formatting to ensure it is in the expected format
+
+    :param base_url: base_url to format
+    :type base_url: str
+    :return: a string containing the formatted/normalized base_url
+    :rtype: str
+    """
 
     if base_url.endswith('/'):
         base_url = base_url[:-1]
@@ -23,7 +31,15 @@ def format_base_url(base_url):
     return base_url
 
 
-def get_system_layers(base_url):
+def get_system_layers(base_url: str):
+    """
+    Fetches system layers that are found at the URL.
+
+    :param base_url: base url for the API implementation
+    :type base_url: str
+    :return: AlliantApiResponse
+    :rtype: AlliantApiResponse
+    """
 
     url = format_base_url(base_url) + '/security/systemLayers'
     response = requests.get(url)
@@ -31,7 +47,18 @@ def get_system_layers(base_url):
     return AlliantApiResponse(response)
 
 
-def get_application_layers(base_url, system_layer):
+def get_application_layers(base_url: str, system_layer: str):
+    """
+    Fetches application layers that are found on the system layer at the URL.
+
+    :param base_url: base url for the API implementation
+    :type base_url: str
+    :param system_layer: The system layer to get application layer from.  System layers can be found with
+    get_system_layers()
+    :type system_layer: str
+    :return: AlliantApiResponse
+    :rtype: AlliantApiResponse
+    """
 
     url = format_base_url(base_url) + f'/security/systemLayers/{system_layer}/applicationLayers'
     response = requests.get(url)
@@ -46,7 +73,9 @@ def get_application_layers(base_url, system_layer):
 
 
 class AlliantApiResponse:
-
+    """
+    A class to structure the responses from API calls
+    """
     def __init__(self, response):
 
         try:
@@ -107,24 +136,28 @@ class RequestFormat:
 class Collection(AlliantApiResponse):
 
     @property
-    def next_page_url(self):
+    def next_page_url(self) -> str:
         return self.result.get('previousPageUrl')
 
     @property
-    def previous_page_url(self):
+    def previous_page_url(self) -> str:
         return self.result.get('nextPageUrl')
 
     @property
-    def items(self):
+    def items(self) -> list:
         return self.result.get('items')
 
     @property
-    def item_count(self):
+    def item_count(self) -> int:
         return self.result.get('itemCount')
 
     @property
-    def total_item_count(self):
+    def total_item_count(self) -> int:
         return self.result.get('totalItemCount')
+
+    @property
+    def guids(self) -> list:
+        return [item.get('guid') for item in self.items]
 
 
 class Adjustment(AlliantApiResponse):
@@ -168,10 +201,9 @@ class Contract(AlliantApiResponse):
 
 
 class Client:
-    _instance = None
-    _lock = threading.Lock()
 
-    def __init__(self, base_url, user_id=None, password=None, system_layer_key=None, application_layer=None):
+    def __init__(self, base_url: str, user_id: str = None, password: str = None, system_layer_key: str = None,
+                 application_layer: str = None):
         """
 
         :param base_url: This is the base URL for the API
@@ -204,11 +236,11 @@ class Client:
         self.adjustment_headers_url = self.base_url + '/data/adjustmentHeaders'
         self.contracts_url = self.base_url + '/data/contracts'
 
-    def login(self):
+    def login(self) -> AlliantApiResponse:
         """
         This method logs into Alliant and sets the token value in the class.  It is recommended that you use this class
         with a context manager to ensure sessions are logged out in the event of an error
-        :return: Response Class
+        :return: AlliantApiResponse
         """
 
         login_url = self.base_url + '/security/login'
@@ -236,7 +268,13 @@ class Client:
 
         return AlliantApiResponse(response)
 
-    def logout(self):
+    def logout(self) -> AlliantApiResponse:
+        """
+        Logs out of the API session
+
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
 
         logout_url = self.base_url + '/security/logout'
 
@@ -246,22 +284,8 @@ class Client:
         )
 
         logging.info("Logged out")
-        return response.json()
+        return AlliantApiResponse(response)
 
-    @staticmethod
-    def lookup_guid_with_filter(filter_field,  filter_value, lookup_method):
-
-        response = lookup_method(filter_field,  filter_value)
-
-        try:
-            if response:
-                guid = response.items[0].get('guid')
-            else:
-                guid = None
-        except IndexError:
-            guid = None
-
-        return guid
 
     def send_request(self, req):
 
@@ -312,7 +336,10 @@ class Client:
     #
     #################################################################################################
 
-    def lookup_user_x_collection(self, tc_number, number_of_records=20):
+    def lookup_user_x_collection(self, tc_number: str, number_of_records=20):
+        """
+
+        """
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
@@ -385,23 +412,25 @@ class Client:
         params = f"$filter={filter_field} eq+'{str_id.replace(' ', '+')}'"
 
         req = requests.Request('GET',
-            self.adjustment_headers_url,
-            params=params
-        )
+                               self.adjustment_headers_url,
+                               params=params
+                               )
 
         response = self.send_request(req)
 
         return Collection(response)
 
-    def lookup_adjustment_guid_with_filter(self, filter_field,  filter_value):
+    def lookup_adjustment_guid_with_filter(self, filter_field,  filter_value) -> str:
 
-        return self.lookup_guid_with_filter(filter_field,  filter_value, self.lookup_adjustment_with_filter)
+        response = self.lookup_adjustment_with_filter(filter_field, filter_value)
+
+        return response.guids[0]
 
     def lookup_adjustment(self, guid):
 
         req = requests.Request('GET',
-            self.adjustment_headers_url + '/' + guid,
-        )
+                               self.adjustment_headers_url + '/' + guid,
+                               )
 
         response = self.send_request(req)
 
@@ -410,14 +439,14 @@ class Client:
     def delete_adjustment(self, guid):
 
         req = requests.Request('DELETE',
-            self.adjustment_headers_url + '/' + guid,
-        )
+                               self.adjustment_headers_url + '/' + guid,
+                               )
 
         response = self.send_request(req)
 
         return AlliantApiResponse(response)
 
-    def adjustment_action(self, guid, action, comment=None):
+    def adjustment_action(self, guid: str, action: str, comment: str = None):
         """
 
         :param guid: This is the guid of the resource
@@ -442,13 +471,13 @@ class Client:
 
         if action in actions_requiring_comment:
             req = requests.Request('PUT',
-                action_url,
-                json={'comment': comment}
+                                   action_url,
+                                   json={'comment': comment}
             )
         else:
             req = requests.Request('PUT',
-                action_url,
-            )
+                                   action_url,
+                                   )
 
         response = self.send_request(req)
 
@@ -467,29 +496,39 @@ class Client:
         params = f"$filter={filter_field} eq+'{str_id.replace(' ', '+')}'"
 
         req = requests.Request('GET',
-            self.contracts_url,
-            params=params
-        )
+                               self.contracts_url,
+                               params=params
+                               )
 
         response = self.send_request(req)
 
         return Collection(response)
 
-    def lookup_contract_guid_with_filter(self, filter_field,  filter_value):
+    def lookup_contract_guid_with_filter(self, filter_field: str,  filter_value: str) -> str:
 
-        return self.lookup_guid_with_filter(filter_field,  filter_value, self.lookup_contract_with_filter)
+        response = self.lookup_contract_with_filter(filter_field, filter_value)
+
+        return response.guids[0]
 
     def lookup_contract(self, guid):
 
         req = requests.Request('GET',
-            self.contracts_url + '/' + guid,
-        )
+                               self.contracts_url + '/' + guid,
+                               )
 
         response = self.send_request(req)
 
         return Contract(response)
 
-    def delete_contract(self, guid):
+    def delete_contract(self, guid: str) -> AlliantApiResponse:
+        """
+        This will delete a contract provided it is in revision or in setup
+
+        :param guid: The guid of the contract to be deleted
+        :type guid: str
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
 
         req = requests.Request('DELETE',
             self.contracts_url + '/' + guid,
@@ -499,13 +538,17 @@ class Client:
 
         return AlliantApiResponse(response)
 
-    def contract_action(self, guid, action, comment=None):
+    def contract_action(self, guid: str, action: str, comment: str = None) -> AlliantApiResponse:
         """
+
 
         :param guid: This is the guid of the resource
         :param action: The action to be performed.  available actions are: 'approve', 'complete', 'copy', 'insetup',
                         model', 'resolve', 'revise'
-        :return:
+        :param comment: The action 'approve' requires a comment.  If the action is not 'approve, then this is optional
+        :type comment: str
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
         """
 
         available_actions = ['approve', 'complete', 'copy', 'insetup', 'model', 'resolve', 'revise']
