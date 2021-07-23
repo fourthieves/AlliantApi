@@ -1,15 +1,11 @@
 from setuptools import setup
 
 requires = [
-    'certifi == 2021.5.30',
-    'charset - normalizer == 2.0.3',
-    'idna == 3.2',
-    'requests == 2.26.0',
-    'urllib3 == 1.26.6',
+    'requests>=2.26.0',
 ]
 
 setup(
-    name='allianrt api',
+    name='alliant api',
     version='0.1',
     packages=['alliantapi'],
     url='https://github.com/fourthieves/AlliantApi',
