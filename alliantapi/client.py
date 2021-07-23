@@ -1,9 +1,9 @@
 import logging
-import threading
 import time
 import requests
 from json import JSONDecodeError
 from dataclasses import dataclass
+from .exceptions import ActionNotImplemented, CommentRequired
 
 #################################################################################################
 #
@@ -115,7 +115,7 @@ class AlliantApiResponse:
             )
 
         if self.hasWarnings:
-            logging.error(
+            logging.warning(
                 f'{self.request.method = }\n'
                 f'  {self.status_code = }\n'
                 f'  {self.request.url = }\n'
@@ -123,6 +123,8 @@ class AlliantApiResponse:
                 f'  {self.request.body = }\n'
                 f'  {self.warnings = }'
             )
+
+        return
 
 
 @dataclass
@@ -531,8 +533,8 @@ class Client:
         """
 
         req = requests.Request('DELETE',
-            self.contracts_url + '/' + guid,
-        )
+                               self.contracts_url + '/' + guid,
+                               )
 
         response = self.send_request(req)
 
@@ -578,16 +580,6 @@ class Client:
 
         return AlliantApiResponse(response)
 
-#################################################################################################
-#
-#   Custom exceptions
-#
-#################################################################################################
 
 
-class ActionNotImplemented(Exception):
-    pass
 
-
-class CommentRequired(Exception):
-    pass
