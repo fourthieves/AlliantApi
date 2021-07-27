@@ -3,6 +3,10 @@
 ## Python Version
 This is written to utilise features included in Python 3.8 so will not be compatible with earlier versions.
 
+## Installation
+
+To install, run `pip install git+https://github.com/fourthieves/AlliantApi.git`
+
 ## Basic Introduction
 
 The Alliant API is a rest api developed by Real Software Systems to perform operations against the Alliant software.
