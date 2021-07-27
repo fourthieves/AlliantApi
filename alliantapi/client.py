@@ -5,6 +5,7 @@ from json import JSONDecodeError
 from dataclasses import dataclass
 from .exceptions import ActionNotImplemented, CommentRequired
 
+
 #################################################################################################
 #
 #   Global functions to support the module
@@ -77,6 +78,28 @@ class AlliantApiResponse:
     A class to structure the responses from API calls
     """
     def __init__(self, response):
+        """
+
+        :param response: This response object is a requests.response object.
+        :type response: Complete documentation for this object can be found at https://docs.python-requests.org/en/master/api/#requests.Response
+        """
+
+        self._response = response
+
+        self.status_code = response.status_code
+        self.url = response.url
+        self.ok = response.ok
+        self.reason = response.reason
+        self.elapsed = response.elapsed
+        self.headers = response.hearders
+        self.encoding = response.encoding
+        self.request = RequestFormat(
+            response.request.method,
+            response.request.url,
+            response.request.body,
+            response.request.headers
+        )
+        self.text = response.text
 
         try:
             self.errors = response.json().get('errors')
@@ -93,16 +116,6 @@ class AlliantApiResponse:
                 f'  {response.request.headers = }\n'
                 f'  {response.request.body = }\n'
             )
-
-            return
-
-        self.status_code = response.status_code
-        self.request = RequestFormat(
-            response.request.method,
-            response.request.url,
-            response.request.body,
-            response.request.headers
-        )
 
         if self.has_errors:
             logging.error(
@@ -125,6 +138,18 @@ class AlliantApiResponse:
             )
 
         return
+
+    def __bool__(self) -> bool:
+        """Returns True if :attr:`status_code` is less than 400.
+        This attribute checks if the status code of the response is between
+        400 and 600 to see if there was a client error or a server error. If
+        the status code, is between 200 and 400, this will return True. This
+        is **not** a check to see if the response code is ``200 OK``.
+        """
+        return self.ok
+
+    def raise_for_status(self):
+        return self._response.raise_for_status()
 
 
 @dataclass

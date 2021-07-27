@@ -20,7 +20,7 @@ The low level access methods exist in the `Client` class, located in `client.py`
 that utilises the low level methods in `Client` to form higher level abstractions and methods from either can 
 be accessed by end users using `AlliantAPI`
 
-## Instantiate the class
+## Create an AlliantApi object
 
 It is recommended that the context manger is used.  The Alliant API creates a session on login and the context manager 
 will handle logging in as well as logging out at the end of the block, or in the event of an error.
@@ -148,3 +148,41 @@ There have been a number of methods written to directly interact with the variou
 * lookup_contract(guid)
 * delete_contract(guid)
 * contract_action(guid, action, comment=None)
+
+# The AlliantApiResponse object
+
+When you make an API call with a low level method, an AlliantApiResponse object is returned. There is a bit of an 
+overlap between the AlliantApiResponse object, and the Response object that is returned by the Requests libray for anyone
+familiar with that library.
+
+There is a base response object, and this is extended for certain types of call.
+
+The base AlliantApiResponse object has the following properties related to the response
+
+| Property           | Datatype               | Explanation                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+|--------------------|------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| elapsed            | datetime               | The amount of time elapsed between sending the request and the arrival of the response (as a timedelta). This property specifically measures the time   taken between sending the first byte of the request and finishing parsing the   headers.                                                                                                                                                                                                  |
+| encoding           | str                    | Encoding to decode with when accessing r.text.                                                                                                                                                                                                                                                                                                                                                                                                    |
+| errors             | list of dicts          | A list of all of the error returned                                                                                                                                                                                                                                                                                                                                                                                                               |
+| has_errors         | bool                   | Returns `True` if there are any errors in the errors property                                                                                                                                                                                                                                                                                                                                                                                     |
+| has_warnings       | bool                   | Returns `True` if there are any warnings in the warnings property                                                                                                                                                                                                                                                                                                                                                                                 |
+| headers            | dict                   | Case-insensitive Dictionary of Response Headers. For example, `headers['content-encoding']` will return the value of a 'Content-Encoding' response header.                                                                                                                                                                                                                                                                                        |
+| ok                 | bool                   | Returns `True` if status_code is less than 400, `False` if not. This attribute checks if the status code of the response is between 400 and 600 to see if there was a client error or a server error. If the status code   is between 200 and 400, this will return True. This is not a check to see if the response code is 200 OK.                                                                                                              |
+| raise_for_status() | exception              | Raises `HTTPError`, if one occurred.                                                                                                                                                                                                                                                                                                                                                                                                              |
+| reason             | str                    | Textual reason   of responded HTTP Status, e.g. “Not Found” or “OK”                                                                                                                                                                                                                                                                                                                                                                               |
+| request            | RequestFormat          | Returns a RequestFormat object with the following properties:<br/> *`method` _str_ <br/> *`url` _str_<br/> *`body` _str_<br/> *`headers` _str_                                                                                                                                                                                                                                                                                                    |
+| result             | list of dicts, or dict | the content of the result key in the JSON returned by the API.                                                                                                                                                                                                                                                                                                                                                                                    |
+| status_code        | int                    | Integer Code   of responded HTTP Status, e.g. 404 or 200.                                                                                                                                                                                                                                                                                                                                                                                         |
+| text               | str                    | Content of the response, in unicode. <br/><br/>If Response.encoding is None, encoding will be guessed using charset_normalizer or chardet. <br/><br/>  The encoding of the response content is determined based solely on HTTP headers, following RFC 2616 to the letter. If you can take advantage of non-HTTP knowledge to make a better guess at the encoding, you should set r.encoding appropriately before accessing this property.         |
+| url                | str                    | Final URL   location of Response.                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| warnings           | list of dicts          | A list of all the warnings returned                                                                                                                                                                                                                                                                                                                                                                                                               |
+
+## Adjustments 
+Adjustments are extended with an `adjustment_status` property
+
+## Collections 
+Collections are extended with an `items` property that returns the _list_ of objects in the collection, from the result 
+
+## Contracts
+Contracts are extended with a `contract_status` property
+
