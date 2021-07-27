@@ -73,48 +73,35 @@ def get_application_layers(base_url: str, system_layer: str):
 #################################################################################################
 
 
-class AlliantApiResponse:
+class AlliantApiResponse(requests.Response):
     """
     A class to structure the responses from API calls
     """
-    def __init__(self, response):
+    def __init__(self, response: requests.Response):
         """
 
         :param response: This response object is a requests.response object.
         :type response: Complete documentation for this object can be found at https://docs.python-requests.org/en/master/api/#requests.Response
         """
 
-        self._response = response
-
-        self.status_code = response.status_code
-        self.url = response.url
-        self.ok = response.ok
-        self.reason = response.reason
-        self.elapsed = response.elapsed
-        self.headers = response.hearders
-        self.encoding = response.encoding
-        self.request = RequestFormat(
-            response.request.method,
-            response.request.url,
-            response.request.body,
-            response.request.headers
-        )
-        self.text = response.text
+        # This gets the state from the Response object that has been passed in, and then applies it to our
+        # new AlliantApiResponse object
+        self.__setstate__(response.__getstate__())
 
         try:
-            self.errors = response.json().get('errors')
-            self.has_errors = response.json().get('hasErrors')
-            self.result = response.json().get('result')
-            self.warnings = response.json().get('warnings')
-            self.has_warnings = response.json().get('hasWarnings')
+            self.errors = self.json().get('errors')
+            self.has_errors = self.json().get('hasErrors')
+            self.result = self.json().get('result')
+            self.warnings = self.json().get('warnings')
+            self.has_warnings = self.json().get('hasWarnings')
 
         except JSONDecodeError:
             logging.error(
-                f'{response.request.method = }\n'
-                f'  {response.status_code = }\n'
-                f'  {response.request.url = }\n'
-                f'  {response.request.headers = }\n'
-                f'  {response.request.body = }\n'
+                f'{self.request.method = }\n'
+                f'  {self.status_code = }\n'
+                f'  {self.request.url = }\n'
+                f'  {self.request.headers = }\n'
+                f'  {self.request.body = }\n'
             )
 
         if self.has_errors:
@@ -138,18 +125,6 @@ class AlliantApiResponse:
             )
 
         return
-
-    def __bool__(self) -> bool:
-        """Returns True if :attr:`status_code` is less than 400.
-        This attribute checks if the status code of the response is between
-        400 and 600 to see if there was a client error or a server error. If
-        the status code, is between 200 and 400, this will return True. This
-        is **not** a check to see if the response code is ``200 OK``.
-        """
-        return self.ok
-
-    def raise_for_status(self):
-        return self._response.raise_for_status()
 
 
 @dataclass
