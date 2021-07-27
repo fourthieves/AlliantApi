@@ -124,30 +124,33 @@ print(f"{aa.token = }  {aa.token_expires = }")
 
 print(aa.logout())
 ```
-# Low Level Methods
+
+# Available Methods
+
+## Low Level Methods
 
 There have been a number of methods written to directly interact with the various endpoints.
 
-## Transaction Characteristics
-* lookup_user_x_collection(tc_number, number_of_records=20)
-* lookup_user_x_with_filter(tc_number, filter_field,  filter_value, verbosity='default')
-* lookup_user_x_guid_with_filter(tc_number, filter_field,  filter_value)
-* lookup_user_x(tc_number,  guid)
-* patch_user_x(tc_number, guid, body)
-
-## Adjustment Methods
+### Adjustment Methods
 * lookup_adjustment_with_filter(filter_field,  filter_value)
 * lookup_adjustment_guid_with_filter(filter_field,  filter_value)
 * lookup_adjustment(guid)
 * delete_adjustment(guid)
 * adjustment_action(guid, action, comment=None)
 
-## Contract Methods
+### Contract Methods
 * lookup_contract_with_filter(filter_field,  filter_value)
 * lookup_contract_guid_with_filter(filter_field,  filter_value)
 * lookup_contract(guid)
 * delete_contract(guid)
 * contract_action(guid, action, comment=None)
+
+### Transaction Characteristics
+* lookup_user_x_collection(tc_number, number_of_records=20)
+* lookup_user_x_with_filter(tc_number, filter_field,  filter_value, verbosity='default')
+* lookup_user_x_guid_with_filter(tc_number, filter_field,  filter_value)
+* lookup_user_x(tc_number,  guid)
+* patch_user_x(tc_number, guid, body)
 
 # The AlliantApiResponse object
 
