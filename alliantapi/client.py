@@ -80,10 +80,10 @@ class AlliantApiResponse:
 
         try:
             self.errors = response.json().get('errors')
-            self.hasErrors = response.json().get('hasErrors')
+            self.has_errors = response.json().get('hasErrors')
             self.result = response.json().get('result')
             self.warnings = response.json().get('warnings')
-            self.hasWarnings = response.json().get('hasWarnings')
+            self.has_warnings = response.json().get('hasWarnings')
 
         except JSONDecodeError:
             logging.error(
@@ -104,7 +104,7 @@ class AlliantApiResponse:
             response.request.headers
         )
 
-        if self.hasErrors:
+        if self.has_errors:
             logging.error(
                 f'{self.request.method = }\n'
                 f'  {self.status_code = }\n'
@@ -114,7 +114,7 @@ class AlliantApiResponse:
                 f'  {self.errors = }'
             )
 
-        if self.hasWarnings:
+        if self.has_warnings:
             logging.warning(
                 f'{self.request.method = }\n'
                 f'  {self.status_code = }\n'
