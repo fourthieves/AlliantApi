@@ -89,7 +89,7 @@ class Collection(AlliantApiResponse):
 class Adjustment(AlliantApiResponse):
     """
     A subclass of Response.  This offers additional methods to return data specific to the adjustment header object.
-    It can only works with a resource and not with a collection
+    It can only work with a resource and not with a collection
     """
     def __init__(self, response: Response):
         super().__init__(response)
@@ -103,7 +103,7 @@ class Adjustment(AlliantApiResponse):
 class Contract(AlliantApiResponse):
     """
     A subclass of Response.  This offers additional methods to return data specific to the adjustment header object.
-    It can only works with a resource and not with a collection
+    It can only work with a resource and not with a collection
     """
 
     def __init__(self, response: Response):
