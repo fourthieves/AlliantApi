@@ -94,8 +94,10 @@ class Adjustment(AlliantApiResponse):
     def __init__(self, response: Response):
         super().__init__(response)
 
+        self.adjustment_status: str
+
         try:
-            self.adjustment_status: str = self.result.get('statusReference').get('displayName')
+            self.adjustment_status = self.result.get('statusReference').get('displayName')
         except AttributeError:
             self.adjustment_status = None
 
@@ -109,8 +111,10 @@ class Contract(AlliantApiResponse):
     def __init__(self, response: Response):
         super().__init__(response)
 
+        self.contract_status: str
+
         try:
-            self.contract_status: str = self.result.get('statusReference').get('displayName')
+            self.contract_status = self.result.get('statusReference').get('displayName')
         except AttributeError:
             self.contract_status = None
 
