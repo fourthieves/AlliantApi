@@ -23,7 +23,9 @@ class AlliantApiResponse(Response):
 
         # This gets the state from the Response object that has been passed in, and then applies it to our
         # new AlliantApiResponse object
-        super().__init__()
+
+        super().__init__()  # This is redundant but it makes the linter happy
+
         self.__setstate__(response.__getstate__())
 
         try:
@@ -41,6 +43,12 @@ class AlliantApiResponse(Response):
                 f'  {self.request.headers = }\n'
                 f'  {self.request.body = }\n'
             )
+
+            self.errors: list = []
+            self.has_errors: bool = True
+            self.result = None
+            self.warnings: list = []
+            self.has_warnings: bool = False
 
         if self.has_errors:
             logging.error(
