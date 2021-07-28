@@ -17,11 +17,13 @@ class AlliantApiResponse(Response):
         """
 
         :param response: This response object is a requests.response object.
-        :type response: Complete documentation for this object can be found at https://docs.python-requests.org/en/master/api/#requests.Response
+        :type response: Complete documentation for this object can be found at
+            https://docs.python-requests.org/en/master/api/#requests.Response
         """
 
         # This gets the state from the Response object that has been passed in, and then applies it to our
         # new AlliantApiResponse object
+        super().__init__()
         self.__setstate__(response.__getstate__())
 
         try:
