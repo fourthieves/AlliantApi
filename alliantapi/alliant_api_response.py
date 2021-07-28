@@ -1,11 +1,10 @@
 import logging
 from requests import Response
 from json import JSONDecodeError
-from dataclasses import dataclass
 
 #################################################################################################
 #
-#   Data Classes and sub classes for formatting responses
+#   Classes for formatting responses
 #
 #################################################################################################
 
@@ -62,14 +61,6 @@ class AlliantApiResponse(Response):
             )
 
         return
-
-
-@dataclass
-class RequestFormat:
-    method: str
-    url: str
-    body: str
-    headers: str
 
 
 class Collection(AlliantApiResponse):
