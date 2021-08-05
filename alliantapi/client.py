@@ -2,7 +2,7 @@ import logging
 import time
 import requests
 from .exceptions import ActionNotImplemented, CommentRequired
-from .alliant_api_response import AlliantApiResponse
+from .alliant_api_response import *
 
 #################################################################################################
 #
