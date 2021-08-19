@@ -107,6 +107,7 @@ class Client:
         self.user_x_url_base = self.base_url + f'/data/user'
         self.adjustment_headers_url = self.base_url + '/data/adjustmentHeaders'
         self.contracts_url = self.base_url + '/data/contracts'
+        self.metadata_reset = self.base_url + '/metadata/reset'
 
     def login(self) -> AlliantApiResponse:
         """
@@ -258,6 +259,18 @@ class Client:
         params = verbosity
 
         req = requests.Request('PUT', user_x_url, json=body, params=params)
+
+        response = self.send_request(req)
+
+        return AlliantApiResponse(response)
+
+    def create_user_x(self, tc_number: str, body: dict, verbosity='default') -> AlliantApiResponse:
+
+        user_x_url = self.user_x_url_base + str(tc_number)
+
+        params = verbosity
+
+        req = requests.Request('POST', user_x_url, json=body, params=params)
 
         response = self.send_request(req)
 
@@ -448,6 +461,13 @@ class Client:
 
         return AlliantApiResponse(response)
 
+    def reset_metadata(self):
+
+        req = requests.Request('POST', self.metadata_reset)
+
+        response = self.send_request(req)
+
+        return Contract(response)
 
 
 
