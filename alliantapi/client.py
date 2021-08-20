@@ -4,6 +4,7 @@ import requests
 from .exceptions import *
 from .alliant_api_response import *
 
+
 #################################################################################################
 #
 #   Global functions to support the module
@@ -109,6 +110,11 @@ class Client:
         self.contacts_url = self.base_url + '/data/contacts'
         self.contracts_url = self.base_url + '/data/contracts'
         self.metadata_reset = self.base_url + '/metadata/reset'
+
+    @staticmethod
+    def preprocess_filter(string):
+
+        return string.replace("'", r"\'").replace(' ', '+')
 
     def login(self) -> AlliantApiResponse:
         """
@@ -221,13 +227,13 @@ class Client:
 
         return Collection(response)
 
-    def lookup_user_x_with_filter(self, tc_number, filter_field,  filter_value, verbosity='default') -> Collection:
+    def lookup_user_x_with_filter(self, tc_number, filter_field, filter_value, verbosity='default') -> Collection:
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
-        str_id = str(filter_value)
+        str_id = self.preprocess_filter(str(filter_value))
 
-        params = f"{verbosity}&$filter={filter_field} eq+'{str_id.replace(' ', '+')}'"
+        params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
         req = requests.Request('GET', user_x_url, params=params)
 
@@ -235,13 +241,13 @@ class Client:
 
         return Collection(response)
 
-    def lookup_user_x_guid_with_filter(self, tc_number, filter_field,  filter_value) -> str:
+    def lookup_user_x_guid_with_filter(self, tc_number, filter_field, filter_value) -> str:
 
         response = self.lookup_user_x_with_filter(tc_number, filter_field, filter_value, verbosity='minimal')
 
         return response.guids[0]
 
-    def lookup_user_x(self, tc_number,  guid, verbosity='default') -> AlliantApiResponse:
+    def lookup_user_x(self, tc_number, guid, verbosity='default') -> AlliantApiResponse:
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
@@ -283,11 +289,11 @@ class Client:
     #
     #################################################################################################
 
-    def lookup_adjustment_with_filter(self, filter_field,  filter_value, verbosity='default') -> Collection:
+    def lookup_adjustment_with_filter(self, filter_field, filter_value, verbosity='default') -> Collection:
 
-        str_id = str(filter_value)
+        str_id = self.preprocess_filter(str(filter_value))
 
-        params = f"{verbosity}&$filter={filter_field} eq+'{str_id.replace(' ', '+')}'"
+        params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
         req = requests.Request('GET',
                                self.adjustment_headers_url,
@@ -298,7 +304,7 @@ class Client:
 
         return Collection(response)
 
-    def lookup_adjustment_guid_with_filter(self, filter_field,  filter_value) -> str:
+    def lookup_adjustment_guid_with_filter(self, filter_field, filter_value) -> str:
 
         response = self.lookup_adjustment_with_filter(filter_field, filter_value, verbosity='minimal')
 
@@ -354,7 +360,7 @@ class Client:
             req = requests.Request('PUT',
                                    action_url,
                                    json={'comment': comment}
-            )
+                                   )
         else:
             req = requests.Request('PUT',
                                    action_url,
@@ -370,11 +376,11 @@ class Client:
     #
     #################################################################################################
 
-    def lookup_contract_with_filter(self, filter_field,  filter_value, verbosity='default') -> Collection:
+    def lookup_contract_with_filter(self, filter_field, filter_value, verbosity='default') -> Collection:
 
-        str_id = str(filter_value)
+        str_id = self.preprocess_filter(str(filter_value))
 
-        params = f"{verbosity}&$filter={filter_field} eq+'{str_id.replace(' ', '+')}'"
+        params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
         req = requests.Request('GET',
                                self.contracts_url,
@@ -385,7 +391,7 @@ class Client:
 
         return Collection(response)
 
-    def lookup_contract_guid_with_filter(self, filter_field: str,  filter_value: str) -> str:
+    def lookup_contract_guid_with_filter(self, filter_field: str, filter_value: str) -> str:
 
         response = self.lookup_contract_with_filter(filter_field, filter_value, verbosity='minimal')
 
@@ -468,11 +474,11 @@ class Client:
     #
     #################################################################################################
 
-    def lookup_contact_with_filter(self, filter_field,  filter_value, verbosity='default') -> Collection:
+    def lookup_contact_with_filter(self, filter_field, filter_value, verbosity='default') -> Collection:
 
-        str_id = str(filter_value)
+        str_id = self.preprocess_filter(str(filter_value))
 
-        params = f"{verbosity}&$filter={filter_field} eq+'{str_id.replace(' ', '+')}'"
+        params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
         req = requests.Request('GET',
                                self.contacts_url,
@@ -483,7 +489,7 @@ class Client:
 
         return Collection(response)
 
-    def lookup_contact_guid_with_filter(self, filter_field: str,  filter_value: str) -> str:
+    def lookup_contact_guid_with_filter(self, filter_field: str, filter_value: str) -> str:
 
         response = self.lookup_contact_with_filter(filter_field, filter_value, verbosity='minimal')
 
@@ -524,7 +530,6 @@ class Client:
         response = self.send_request(req)
 
         return AlliantApiResponse(response)
-
 
     def reset_metadata(self):
 
