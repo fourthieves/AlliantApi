@@ -106,6 +106,7 @@ class Client:
         # URLs
         self.user_x_url_base = self.base_url + f'/data/user'
         self.adjustment_headers_url = self.base_url + '/data/adjustmentHeaders'
+        self.contacts_url = self.base_url + '/data/contacts'
         self.contracts_url = self.base_url + '/data/contracts'
         self.metadata_reset = self.base_url + '/metadata/reset'
 
@@ -460,6 +461,70 @@ class Client:
         response = self.send_request(req)
 
         return AlliantApiResponse(response)
+
+    #################################################################################################
+    #
+    #   Contact Methods
+    #
+    #################################################################################################
+
+    def lookup_contact_with_filter(self, filter_field,  filter_value, verbosity='default') -> Collection:
+
+        str_id = str(filter_value)
+
+        params = f"{verbosity}&$filter={filter_field} eq+'{str_id.replace(' ', '+')}'"
+
+        req = requests.Request('GET',
+                               self.contacts_url,
+                               params=params
+                               )
+
+        response = self.send_request(req)
+
+        return Collection(response)
+
+    def lookup_contact_guid_with_filter(self, filter_field: str,  filter_value: str) -> str:
+
+        response = self.lookup_contact_with_filter(filter_field, filter_value, verbosity='minimal')
+
+        return response.guids[0]
+
+    def lookup_contact(self, guid, verbosity='default') -> AlliantApiResponse:
+
+        params = verbosity
+
+        req = requests.Request('GET',
+                               self.contacts_url + '/' + guid,
+                               params=params
+                               )
+
+        response = self.send_request(req)
+
+        return AlliantApiResponse(response)
+
+    def lookup_contact_collection(self, verbosity='default') -> Collection:
+
+        params = verbosity
+
+        req = requests.Request('GET',
+                               self.contacts_url,
+                               params=params
+                               )
+
+        response = self.send_request(req)
+
+        return Collection(response)
+
+    def delete_contact(self, guid: str) -> AlliantApiResponse:
+
+        req = requests.Request('DELETE',
+                               self.contacts_url + '/' + guid,
+                               )
+
+        response = self.send_request(req)
+
+        return AlliantApiResponse(response)
+
 
     def reset_metadata(self):
 
