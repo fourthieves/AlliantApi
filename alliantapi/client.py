@@ -76,7 +76,11 @@ def get_application_layers(base_url: str, system_layer: str) -> AlliantApiRespon
 class Client:
 
     def __init__(self, base_url: str, user_id: str = None, password: str = None, system_layer_key: str = None,
-                 application_layer: str = None):
+                 application_layer: str = None,
+                 number_of_retries: int = 10,
+                 retry_delay: int = 3,
+                 retry_backoff: int = 2
+                 ):
         """
 
         :param base_url: This is the base URL for the API
@@ -87,10 +91,10 @@ class Client:
         :param application_layer: This can be found with the helper function get_application_layers()
         """
 
-        self.number_of_retries = 10
-        self.retry_delay = 3
-        self.retry_backoff = 2
-        self.error_codes_to_retry = (500, 403)
+        self.number_of_retries = number_of_retries
+        self.retry_delay = retry_delay
+        self.retry_backoff = retry_backoff
+        self.error_codes_to_retry = [500, 403]
 
         self.base_url = format_base_url(base_url)
 
