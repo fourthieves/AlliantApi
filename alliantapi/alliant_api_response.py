@@ -1,3 +1,7 @@
+"""
+This module contains classes related to formatting various API responses.
+"""
+
 import logging
 from requests import Response
 from json import JSONDecodeError
@@ -8,12 +12,6 @@ __all__ = [
     'Contract',
     'Adjustment'
 ]
-
-#################################################################################################
-#
-#   Classes for formatting responses
-#
-#################################################################################################
 
 
 class AlliantApiResponse(Response):
