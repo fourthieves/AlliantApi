@@ -116,7 +116,7 @@ class Client:
         self.metadata_reset = self.base_url + '/metadata/reset'
 
     @staticmethod
-    def preprocess_filter(string):
+    def _preprocess_filter(string):
 
         return string.replace("'", r"\'").replace(' ', '+')
 
@@ -170,7 +170,7 @@ class Client:
         logging.info("Logged out")
         return AlliantApiResponse(response)
 
-    def send_request(self, req) -> requests.Response:
+    def _send_request(self, req) -> requests.Response:
 
         retried_count = 0
         retry_time = self.retry_delay
@@ -227,7 +227,7 @@ class Client:
 
         req = requests.Request('GET', user_x_url, params=params)
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Collection(response)
 
@@ -235,13 +235,13 @@ class Client:
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
-        str_id = self.preprocess_filter(str(filter_value))
+        str_id = self._preprocess_filter(str(filter_value))
 
         params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
         req = requests.Request('GET', user_x_url, params=params)
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Collection(response)
 
@@ -259,7 +259,7 @@ class Client:
 
         req = requests.Request('GET', user_x_url + '/' + guid, params=params)
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
@@ -271,7 +271,7 @@ class Client:
 
         req = requests.Request('PUT', user_x_url, json=body, params=params)
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
@@ -283,7 +283,7 @@ class Client:
 
         req = requests.Request('POST', user_x_url, json=body, params=params)
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
@@ -295,7 +295,7 @@ class Client:
 
     def lookup_adjustment_with_filter(self, filter_field, filter_value, verbosity='default') -> Collection:
 
-        str_id = self.preprocess_filter(str(filter_value))
+        str_id = self._preprocess_filter(str(filter_value))
 
         params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
@@ -304,7 +304,7 @@ class Client:
                                params=params
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Collection(response)
 
@@ -323,7 +323,7 @@ class Client:
                                params=params
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Adjustment(response)
 
@@ -333,7 +333,7 @@ class Client:
                                self.adjustment_headers_url + '/' + guid,
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
@@ -370,7 +370,7 @@ class Client:
                                    action_url,
                                    )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
@@ -382,7 +382,7 @@ class Client:
 
     def lookup_contract_with_filter(self, filter_field, filter_value, verbosity='default') -> Collection:
 
-        str_id = self.preprocess_filter(str(filter_value))
+        str_id = self._preprocess_filter(str(filter_value))
 
         params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
@@ -391,7 +391,7 @@ class Client:
                                params=params
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Collection(response)
 
@@ -410,7 +410,7 @@ class Client:
                                params=params
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Contract(response)
 
@@ -428,7 +428,7 @@ class Client:
                                self.contracts_url + '/' + guid,
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
@@ -468,7 +468,7 @@ class Client:
                                    action_url,
                                    )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
@@ -480,7 +480,7 @@ class Client:
 
     def lookup_contact_with_filter(self, filter_field, filter_value, verbosity='default') -> Collection:
 
-        str_id = self.preprocess_filter(str(filter_value))
+        str_id = self._preprocess_filter(str(filter_value))
 
         params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
@@ -489,7 +489,7 @@ class Client:
                                params=params
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Collection(response)
 
@@ -508,7 +508,7 @@ class Client:
                                params=params
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
@@ -521,7 +521,7 @@ class Client:
                                params=params
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Collection(response)
 
@@ -531,7 +531,7 @@ class Client:
                                self.contacts_url + '/' + guid,
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
@@ -539,7 +539,7 @@ class Client:
 
         req = requests.Request('POST', self.metadata_reset)
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Contract(response)
 
