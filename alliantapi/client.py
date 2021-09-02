@@ -12,8 +12,6 @@ from .parameters import Parameters
 #################################################################################################
 
 
-Parameters()
-
 def _format_base_url(base_url: str) -> str:
     """
     Takes a base url and applies formatting to ensure it is in the expected format
