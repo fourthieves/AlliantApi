@@ -12,7 +12,7 @@ from .alliant_api_response import *
 #################################################################################################
 
 
-def format_base_url(base_url) -> str:
+def _format_base_url(base_url) -> str:
     """
     Takes a base url and applies formatting to ensure it is in the expected format
 
@@ -41,7 +41,7 @@ def get_system_layers(base_url: str) -> AlliantApiResponse:
     :rtype: AlliantApiResponse
     """
 
-    url = format_base_url(base_url) + '/security/systemLayers'
+    url = _format_base_url(base_url) + '/security/systemLayers'
     response = requests.get(url)
 
     return AlliantApiResponse(response)
@@ -60,7 +60,7 @@ def get_application_layers(base_url: str, system_layer: str) -> AlliantApiRespon
     :rtype: AlliantApiResponse
     """
 
-    url = format_base_url(base_url) + f'/security/systemLayers/{system_layer}/applicationLayers'
+    url = _format_base_url(base_url) + f'/security/systemLayers/{system_layer}/applicationLayers'
     response = requests.get(url)
 
     return AlliantApiResponse(response)
@@ -96,7 +96,7 @@ class Client:
         self.retry_backoff = retry_backoff
         self.error_codes_to_retry = [500, 403]
 
-        self.base_url = format_base_url(base_url)
+        self.base_url = _format_base_url(base_url)
 
         self.user_id = user_id
         self.password = password
