@@ -3,7 +3,7 @@ import time
 import requests
 from .exceptions import *
 from .alliant_api_response import *
-from .parameters import Parameters
+from .parameters import CollectionParameters, ResourceParameters
 
 #################################################################################################
 #
@@ -126,70 +126,6 @@ class Client:
         self.contracts_url = self.base_url + '/data/contracts'
         self.metadata_reset = self.base_url + '/metadata/reset'
 
-    @staticmethod
-    def _preprocess_filter(string):
-        """
-        Reformats a string that will be used as a filter parameter
-        :param string: The string to be reformatted
-        :type string: str
-        :return:
-        :rtype: STR
-        """
-
-        return string.replace("'", r"\'").replace(' ', '+')
-
-    @staticmethod
-    def _prep_parameters(verbosity: str = None,
-                         include: list[str] = None,
-                         exclude: list[str] = None,
-                         top: int = None,
-                         skip: int = None,
-                         orderby: str = None,
-                         filter_field: str = None,
-                         filter_value: str = None,
-                         filter_operator: str = None
-                         ) -> str:
-        """
-
-        :param verbosity:
-        :type verbosity:
-        :param include:
-        :type include:
-        :param exclude:
-        :type exclude:
-        :param top:
-        :type top:
-        :param skip:
-        :type skip:
-        :param orderby:
-        :type orderby:
-        :param filter_field:
-        :type filter_field:
-        :param filter_value:
-        :type filter_value:
-        :param filter_operator:
-        :type filter_operator:
-        :return:
-        :rtype:
-        """
-
-        param_list = []
-
-        if verbosity:
-            param_list.append(verbosity)
-
-        if include:
-            include_string = f"include={','.join(include)}"
-            param_list.append(include_string)
-
-        if exclude:
-            exclude_string = f"exclude={','.join(exclude)}"
-            param_list.append(exclude_string)
-
-        param_string = ''
-
-        return param_string
-
     def login(self) -> AlliantApiResponse:
         """
         This method logs into Alliant and sets the token value in the class.  It is recommended that you use this class
@@ -298,21 +234,24 @@ class Client:
     #
     #################################################################################################
 
-    def lookup_user_x_collection(self, tc_number: str, parameters: Parameters) -> Collection:
+    def lookup_user_x_collection(self, tc_number: str,
+                                 collection_parameters: CollectionParameters = None) -> Collection:
         """
-
+        Lookup a collection for a Transaction Characteristic.  Supply the number of the TC you would like to interact
+        with and and collection parameters you would like applied to the response.
 
         :param tc_number: the number relating to the TC being referenced. 1-20
         :type tc_number: str
-        :param parameters: an instance of the Parameters class that contains the parameters to be passed
-        :type parameters: Parameters
+        :param collection_parameters: an instance of the CollectionParameters class that contains the parameters to be
+        passed
+        :type collection_parameters: CollectionParameters
         :return: Collection
         :rtype: Collection
         """
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
-        params = parameters.parameter_string()
+        params = collection_parameters.parameter_string()
 
         req = requests.Request('GET', user_x_url, params=params)
 
@@ -321,10 +260,29 @@ class Client:
         return Collection(response)
 
     def lookup_user_x_with_filter(self, tc_number, filter_field, filter_value, verbosity='default') -> Collection:
+        # todo: remove this method
+        """
+        This method is deprecated.  You should now use lookup_user_x_collection and provide it with a
+        CollectionParameters object to lookup a user_x value with a filter.
+
+        :param tc_number:
+        :type tc_number:
+        :param filter_field:
+        :type filter_field:
+        :param filter_value:
+        :type filter_value:
+        :param verbosity:
+        :type verbosity:
+        :return:
+        :rtype:
+        """
+        from warnings import warn
+        warn("This method is deprecated.  You should now use lookup_user_x_collection and provide it with a "
+             "CollectionParameters object to lookup a user_x value with a filter.")
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
-        str_id = self._preprocess_filter(str(filter_value))
+        str_id = ResourceParameters._preprocess_filter(str(filter_value))
 
         params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
@@ -384,7 +342,7 @@ class Client:
 
     def lookup_adjustment_with_filter(self, filter_field, filter_value, verbosity='default') -> Collection:
 
-        str_id = self._preprocess_filter(str(filter_value))
+        str_id = ResourceParameters._preprocess_filter(str(filter_value))
 
         params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
@@ -471,7 +429,7 @@ class Client:
 
     def lookup_contract_with_filter(self, filter_field, filter_value, verbosity='default') -> Collection:
 
-        str_id = self._preprocess_filter(str(filter_value))
+        str_id = ResourceParameters._preprocess_filter(str(filter_value))
 
         params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
@@ -569,7 +527,7 @@ class Client:
 
     def lookup_contact_with_filter(self, filter_field, filter_value, verbosity='default') -> Collection:
 
-        str_id = self._preprocess_filter(str(filter_value))
+        str_id = ResourceParameters._preprocess_filter(str(filter_value))
 
         params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
