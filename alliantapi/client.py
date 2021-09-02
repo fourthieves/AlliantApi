@@ -3,7 +3,7 @@ import time
 import requests
 from .exceptions import *
 from .alliant_api_response import *
-
+from .parameters import Parameters
 
 #################################################################################################
 #
@@ -12,7 +12,9 @@ from .alliant_api_response import *
 #################################################################################################
 
 
-def _format_base_url(base_url) -> str:
+Parameters()
+
+def _format_base_url(base_url: str) -> str:
     """
     Takes a base url and applies formatting to ensure it is in the expected format
 
@@ -77,18 +79,29 @@ class Client:
 
     def __init__(self, base_url: str, user_id: str = None, password: str = None, system_layer_key: str = None,
                  application_layer: str = None,
-                 number_of_retries: int = 10,
+                 number_of_retries: int = 3,
                  retry_delay: int = 3,
                  retry_backoff: int = 2
                  ):
         """
 
-        :param base_url: This is the base URL for the API
-        :param user_id: User Id, preferably for a service account
-        :param password: Password, preferably for a service account
-        :param system_layer_key: value is typically 'default'  This can be found with the helper function
-                get_system_layers()
+        :param base_url: Base URL for the API
+        :type base_url: str
+        :param user_id: User Id for login
+        :type user_id: str
+        :param password: Password for login
+        :type password: str
+        :param system_layer_key: Value is typically 'default'  This can be found with the helper function
+            get_system_layers()
+        :type system_layer_key: str
         :param application_layer: This can be found with the helper function get_application_layers()
+        :type application_layer: str
+        :param number_of_retries: Defaulted to 3. For specified errors, this is the number of times they will be retried
+        :type number_of_retries: int
+        :param retry_delay: Delay between retries in seconds. Defaulted to 3
+        :type retry_delay: int
+        :param retry_backoff: Backoff multiplier between retries.  Defaulted to 2
+        :type retry_backoff: int
         """
 
         self.number_of_retries = number_of_retries
@@ -117,14 +130,75 @@ class Client:
 
     @staticmethod
     def _preprocess_filter(string):
+        """
+        Reformats a string that will be used as a filter parameter
+        :param string: The string to be reformatted
+        :type string: str
+        :return:
+        :rtype: STR
+        """
 
         return string.replace("'", r"\'").replace(' ', '+')
+
+    @staticmethod
+    def _prep_parameters(verbosity: str = None,
+                         include: list[str] = None,
+                         exclude: list[str] = None,
+                         top: int = None,
+                         skip: int = None,
+                         orderby: str = None,
+                         filter_field: str = None,
+                         filter_value: str = None,
+                         filter_operator: str = None
+                         ) -> str:
+        """
+
+        :param verbosity:
+        :type verbosity:
+        :param include:
+        :type include:
+        :param exclude:
+        :type exclude:
+        :param top:
+        :type top:
+        :param skip:
+        :type skip:
+        :param orderby:
+        :type orderby:
+        :param filter_field:
+        :type filter_field:
+        :param filter_value:
+        :type filter_value:
+        :param filter_operator:
+        :type filter_operator:
+        :return:
+        :rtype:
+        """
+
+        param_list = []
+
+        if verbosity:
+            param_list.append(verbosity)
+
+        if include:
+            include_string = f"include={','.join(include)}"
+            param_list.append(include_string)
+
+        if exclude:
+            exclude_string = f"exclude={','.join(exclude)}"
+            param_list.append(exclude_string)
+
+        param_string = ''
+
+        return param_string
 
     def login(self) -> AlliantApiResponse:
         """
         This method logs into Alliant and sets the token value in the class.  It is recommended that you use this class
         with a context manager to ensure sessions are logged out in the event of an error
+
         :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
         """
 
         login_url = self.base_url + '/security/login'
@@ -171,6 +245,13 @@ class Client:
         return AlliantApiResponse(response)
 
     def _send_request(self, req) -> requests.Response:
+        """
+        Handles the sending and retry logic for API calls
+        :param req: The request object from Requests
+        :type req: requests.Request
+        :return: The requests response
+        :rtype: requests.Response
+        """
 
         retried_count = 0
         retry_time = self.retry_delay
@@ -219,11 +300,21 @@ class Client:
     #
     #################################################################################################
 
-    def lookup_user_x_collection(self, tc_number: str, number_of_records=20, verbosity='default') -> Collection:
+    def lookup_user_x_collection(self, tc_number: str, parameters: Parameters) -> Collection:
+        """
+
+
+        :param tc_number: the number relating to the TC being referenced. 1-20
+        :type tc_number: str
+        :param parameters: an instance of the Parameters class that contains the parameters to be passed
+        :type parameters: Parameters
+        :return: Collection
+        :rtype: Collection
+        """
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
-        params = f"{verbosity}&$top={str(number_of_records)}"
+        params = parameters.parameter_string()
 
         req = requests.Request('GET', user_x_url, params=params)
 
@@ -542,6 +633,3 @@ class Client:
         response = self._send_request(req)
 
         return Contract(response)
-
-
-
