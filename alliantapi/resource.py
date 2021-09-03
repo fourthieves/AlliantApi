@@ -24,7 +24,7 @@ class AlliantApi(Client):
 
     def lookup_user_x_guid_with_filter(self, tc_number: str, filter_field: str, filter_value: str) -> str:
         """
-        Resource method to provide a fast route to getting a GUID for a tracnsaction characteristic based on an Id
+        Resource method to provide a fast route to getting a GUID for a transaction characteristic based on an Id
         or description
 
         :param tc_number: the number relating to the TC being referenced. 1-20
