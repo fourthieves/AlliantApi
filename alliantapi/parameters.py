@@ -30,7 +30,7 @@ class ResourceParameters:
     def form_param_string(param_list) -> str:
 
         if param_list:
-            param_string = f"${'&'.join(param_list)}"
+            param_string = '&'.join(param_list)
         else:
             param_string = None
 
