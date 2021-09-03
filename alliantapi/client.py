@@ -238,7 +238,7 @@ class Client:
                                  collection_parameters: CollectionParameters = None) -> Collection:
         """
         Lookup a collection for a Transaction Characteristic.  Supply the number of the TC you would like to interact
-        with and and collection parameters you would like applied to the response.
+        with and collection parameters you would like applied to the response.
 
         :param tc_number: the number relating to the TC being referenced. 1-20
         :type tc_number: str
@@ -265,8 +265,8 @@ class Client:
         This method is deprecated.  You should now use lookup_user_x_collection and provide it with a
         CollectionParameters object to lookup a user_x value with a filter.
 
-        :param tc_number:
-        :type tc_number:
+        :param tc_number: the number relating to the TC being referenced. 1-20
+        :type tc_number: str
         :param filter_field:
         :type filter_field:
         :param filter_value:
@@ -292,17 +292,11 @@ class Client:
 
         return Collection(response)
 
-    def lookup_user_x_guid_with_filter(self, tc_number, filter_field, filter_value) -> str:
-
-        response = self.lookup_user_x_with_filter(tc_number, filter_field, filter_value, verbosity='minimal')
-
-        return response.guids[0]
-
-    def lookup_user_x(self, tc_number, guid, verbosity='default') -> AlliantApiResponse:
+    def lookup_user_x(self, tc_number: str, guid: str, resource_parameters: ResourceParameters = None) -> AlliantApiResponse:
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
-        params = verbosity
+        params = resource_parameters.parameter_string()
 
         req = requests.Request('GET', user_x_url + '/' + guid, params=params)
 
@@ -310,11 +304,12 @@ class Client:
 
         return AlliantApiResponse(response)
 
-    def patch_user_x(self, tc_number, guid, body, verbosity='default') -> AlliantApiResponse:
+    def patch_user_x(self, tc_number: str, guid: str, body: dict,
+                     resource_parameters: ResourceParameters = None) -> AlliantApiResponse:
 
         user_x_url = self.user_x_url_base + str(tc_number) + '/' + guid
 
-        params = verbosity
+        params = resource_parameters.parameter_string()
 
         req = requests.Request('PUT', user_x_url, json=body, params=params)
 
@@ -322,11 +317,12 @@ class Client:
 
         return AlliantApiResponse(response)
 
-    def create_user_x(self, tc_number: str, body: dict, verbosity='default') -> AlliantApiResponse:
+    def create_user_x(self, tc_number: str, body: dict,
+                      resource_parameters: ResourceParameters = None) -> AlliantApiResponse:
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
-        params = verbosity
+        params = resource_parameters.parameter_string()
 
         req = requests.Request('POST', user_x_url, json=body, params=params)
 
@@ -340,7 +336,43 @@ class Client:
     #
     #################################################################################################
 
+    def lookup_adjustment_collection(self, collection_parameters: CollectionParameters = None) -> Collection:
+        """
+        Lookup a collection for Adjustments.  Supply the collection parameters you would like applied to the response.
+
+        :param collection_parameters: an instance of the CollectionParameters class that contains the parameters to be
+        passed
+        :type collection_parameters: CollectionParameters
+        :return: Collection
+        :rtype: Collection
+        """
+
+        params = collection_parameters.parameter_string()
+
+        req = requests.Request('GET', self.adjustment_headers_url, params=params)
+
+        response = self._send_request(req)
+
+        return Collection(response)
+
     def lookup_adjustment_with_filter(self, filter_field, filter_value, verbosity='default') -> Collection:
+        # todo: remove this method
+        """
+        This method is deprecated.  You should now use lookup_adjustment_collection and provide it with a
+        CollectionParameters object to lookup a user_x value with a filter."
+        :param filter_field:
+        :type filter_field:
+        :param filter_value:
+        :type filter_value:
+        :param verbosity:
+        :type verbosity:
+        :return:
+        :rtype:
+        """
+
+        from warnings import warn
+        warn("This method is deprecated.  You should now use lookup_adjustment_collection and provide it with a "
+             "CollectionParameters object to lookup a user_x value with a filter.")
 
         str_id = ResourceParameters._preprocess_filter(str(filter_value))
 
@@ -354,12 +386,6 @@ class Client:
         response = self._send_request(req)
 
         return Collection(response)
-
-    def lookup_adjustment_guid_with_filter(self, filter_field, filter_value) -> str:
-
-        response = self.lookup_adjustment_with_filter(filter_field, filter_value, verbosity='minimal')
-
-        return response.guids[0]
 
     def lookup_adjustment(self, guid, verbosity='default') -> Adjustment:
 
