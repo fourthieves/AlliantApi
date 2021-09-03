@@ -455,7 +455,7 @@ class Client:
 
     def delete_adjustment(self, guid: str) -> AlliantApiResponse:
         """
-        Delete the referenced adjustment
+        Delete the referenced adjustment, provided it has been cleared or not yet posted.
 
         :param guid: the guid for the resource you are referencing
         :type guid: str
@@ -675,9 +675,15 @@ class Client:
         return AlliantApiResponse(response)
 
     def reset_metadata(self):
+        """
+        Clears out cache and resets metadata.  This can be required after certain configuration changes
+
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
 
         req = requests.Request('POST', self.metadata_reset)
 
         response = self._send_request(req)
 
-        return Contract(response)
+        return AlliantApiResponse(response)
