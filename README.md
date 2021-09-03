@@ -151,6 +151,7 @@ There have been a number of methods written to directly interact with the variou
 * lookup_user_x_guid_with_filter(tc_number, filter_field,  filter_value)
 * lookup_user_x(tc_number,  guid)
 * patch_user_x(tc_number, guid, body)
+* create_user_x(tc_number, body)
 
 # The AlliantApiResponse object
 
