@@ -292,7 +292,21 @@ class Client:
 
         return Collection(response)
 
-    def lookup_user_x(self, tc_number: str, guid: str, resource_parameters: ResourceParameters = None) -> AlliantApiResponse:
+    def lookup_user_x(self, tc_number: str, guid: str,
+                      resource_parameters: ResourceParameters = None) -> AlliantApiResponse:
+        """
+        Lookup a transaction characteristic
+
+        :param tc_number: the number relating to the TC being referenced. 1-20
+        :type tc_number: str
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
+        :param resource_parameters: an instance of the ResourceParameters class that contains the parameters to be
+        passed
+        :type resource_parameters: ResourceParameters
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
@@ -306,6 +320,21 @@ class Client:
 
     def patch_user_x(self, tc_number: str, guid: str, body: dict,
                      resource_parameters: ResourceParameters = None) -> AlliantApiResponse:
+        """
+        Perform a partial update on a transaction characteristic
+
+        :param tc_number: the number relating to the TC being referenced. 1-20
+        :type tc_number: str
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
+        :param body: the body of the request to send.  This contains the fields to be updated
+        :type body: dict
+        :param resource_parameters: an instance of the ResourceParameters class that contains the parameters to be
+        passed
+        :type resource_parameters: ResourceParameters
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
 
         user_x_url = self.user_x_url_base + str(tc_number) + '/' + guid
 
@@ -319,6 +348,21 @@ class Client:
 
     def create_user_x(self, tc_number: str, body: dict,
                       resource_parameters: ResourceParameters = None) -> AlliantApiResponse:
+        """
+        Create a transaction characteristic item
+
+        :param tc_number: the number relating to the TC being referenced. 1-20
+        :type tc_number: str
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
+        :param body: the body of the request to send.  This contains the fields to be created
+        :type body: dict
+        :param resource_parameters: an instance of the ResourceParameters class that contains the parameters to be
+        passed
+        :type resource_parameters: ResourceParameters
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
@@ -387,9 +431,18 @@ class Client:
 
         return Collection(response)
 
-    def lookup_adjustment(self, guid, verbosity='default') -> Adjustment:
+    def lookup_adjustment(self, guid, resource_parameters: ResourceParameters = None) -> Adjustment:
+        """
 
-        params = verbosity
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
+        :param resource_parameters: an instance of the ResourceParameters class that contains the parameters to be
+        passed
+        :type resource_parameters: ResourceParameters
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
+        params = resource_parameters.parameter_string()
 
         req = requests.Request('GET',
                                self.adjustment_headers_url + '/' + guid,
@@ -400,7 +453,15 @@ class Client:
 
         return Adjustment(response)
 
-    def delete_adjustment(self, guid):
+    def delete_adjustment(self, guid: str) -> AlliantApiResponse:
+        """
+        Delete the referenced adjustment
+
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
 
         req = requests.Request('DELETE',
                                self.adjustment_headers_url + '/' + guid,
@@ -412,12 +473,17 @@ class Client:
 
     def adjustment_action(self, guid: str, action: str, comment: str = None) -> AlliantApiResponse:
         """
+        Perform a lifecycle action on a specific adjustment
 
-        :param guid: This is the guid of the resource
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
         :param action: The action to be performed.  available actions are: approve, clear, clearRequest, copy,
             insetup, post
+        :type action: str
         :param comment: some of the actions require a comment, if required, this should be entered here.
-        :return:
+        :type comment: str
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
         """
 
         available_actions = ['approve', 'clear', 'clearRequest', 'copy', 'insetup', 'post', 'complete']
