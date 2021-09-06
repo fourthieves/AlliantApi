@@ -94,7 +94,7 @@ class Client:
         self.number_of_retries = number_of_retries
         self.retry_delay = retry_delay
         self.retry_backoff = retry_backoff
-        self.error_codes_to_retry = [500, 403]
+        self.error_codes_to_retry = [500, 403, 409]
 
         self.base_url = format_base_url(base_url)
 
