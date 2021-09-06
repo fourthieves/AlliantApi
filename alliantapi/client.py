@@ -3,7 +3,7 @@ import time
 import requests
 from .exceptions import *
 from .alliant_api_response import *
-
+from .parameters import CollectionParameters, ResourceParameters
 
 #################################################################################################
 #
@@ -12,7 +12,7 @@ from .alliant_api_response import *
 #################################################################################################
 
 
-def format_base_url(base_url) -> str:
+def _format_base_url(base_url: str) -> str:
     """
     Takes a base url and applies formatting to ensure it is in the expected format
 
@@ -41,7 +41,7 @@ def get_system_layers(base_url: str) -> AlliantApiResponse:
     :rtype: AlliantApiResponse
     """
 
-    url = format_base_url(base_url) + '/security/systemLayers'
+    url = _format_base_url(base_url) + '/security/systemLayers'
     response = requests.get(url)
 
     return AlliantApiResponse(response)
@@ -60,7 +60,7 @@ def get_application_layers(base_url: str, system_layer: str) -> AlliantApiRespon
     :rtype: AlliantApiResponse
     """
 
-    url = format_base_url(base_url) + f'/security/systemLayers/{system_layer}/applicationLayers'
+    url = _format_base_url(base_url) + f'/security/systemLayers/{system_layer}/applicationLayers'
     response = requests.get(url)
 
     return AlliantApiResponse(response)
@@ -77,18 +77,29 @@ class Client:
 
     def __init__(self, base_url: str, user_id: str = None, password: str = None, system_layer_key: str = None,
                  application_layer: str = None,
-                 number_of_retries: int = 10,
+                 number_of_retries: int = 3,
                  retry_delay: int = 3,
                  retry_backoff: int = 2
                  ):
         """
 
-        :param base_url: This is the base URL for the API
-        :param user_id: User Id, preferably for a service account
-        :param password: Password, preferably for a service account
-        :param system_layer_key: value is typically 'default'  This can be found with the helper function
-                get_system_layers()
+        :param base_url: Base URL for the API
+        :type base_url: str
+        :param user_id: User Id for login
+        :type user_id: str
+        :param password: Password for login
+        :type password: str
+        :param system_layer_key: Value is typically 'default'  This can be found with the helper function
+            get_system_layers()
+        :type system_layer_key: str
         :param application_layer: This can be found with the helper function get_application_layers()
+        :type application_layer: str
+        :param number_of_retries: Defaulted to 3. For specified errors, this is the number of times they will be retried
+        :type number_of_retries: int
+        :param retry_delay: Delay between retries in seconds. Defaulted to 3
+        :type retry_delay: int
+        :param retry_backoff: Backoff multiplier between retries.  Defaulted to 2
+        :type retry_backoff: int
         """
 
         self.number_of_retries = number_of_retries
@@ -96,7 +107,7 @@ class Client:
         self.retry_backoff = retry_backoff
         self.error_codes_to_retry = [500, 403, 409]
 
-        self.base_url = format_base_url(base_url)
+        self.base_url = _format_base_url(base_url)
 
         self.user_id = user_id
         self.password = password
@@ -115,16 +126,13 @@ class Client:
         self.contracts_url = self.base_url + '/data/contracts'
         self.metadata_reset = self.base_url + '/metadata/reset'
 
-    @staticmethod
-    def preprocess_filter(string):
-
-        return string.replace("'", r"\'").replace(' ', '+')
-
     def login(self) -> AlliantApiResponse:
         """
         This method logs into Alliant and sets the token value in the class.  It is recommended that you use this class
         with a context manager to ensure sessions are logged out in the event of an error
+
         :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
         """
 
         login_url = self.base_url + '/security/login'
@@ -170,7 +178,14 @@ class Client:
         logging.info("Logged out")
         return AlliantApiResponse(response)
 
-    def send_request(self, req) -> requests.Response:
+    def _send_request(self, req) -> requests.Response:
+        """
+        Handles the sending and retry logic for API calls
+        :param req: The request object from Requests
+        :type req: requests.Request
+        :return: The requests response
+        :rtype: requests.Response
+        """
 
         retried_count = 0
         retry_time = self.retry_delay
@@ -219,71 +234,143 @@ class Client:
     #
     #################################################################################################
 
-    def lookup_user_x_collection(self, tc_number: str, number_of_records=20, verbosity='default') -> Collection:
+    def lookup_user_x_collection(self, tc_number: str,
+                                 collection_parameters: CollectionParameters = None) -> Collection:
+        """
+        Lookup a collection for a Transaction Characteristic.  Supply the number of the TC you would like to interact
+        with and collection parameters you would like applied to the response.
+
+        :param tc_number: the number relating to the TC being referenced. 1-20
+        :type tc_number: str
+        :param collection_parameters: an instance of the CollectionParameters class that contains the parameters to be
+        passed
+        :type collection_parameters: CollectionParameters
+        :return: Collection
+        :rtype: Collection
+        """
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
-        params = f"{verbosity}&$top={str(number_of_records)}"
+        params = collection_parameters.parameter_string()
 
         req = requests.Request('GET', user_x_url, params=params)
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Collection(response)
 
     def lookup_user_x_with_filter(self, tc_number, filter_field, filter_value, verbosity='default') -> Collection:
+        # todo: remove this method
+        """
+        This method is deprecated.  You should now use lookup_user_x_collection and provide it with a
+        CollectionParameters object to lookup a user_x value with a filter.
+
+        :param tc_number: the number relating to the TC being referenced. 1-20
+        :type tc_number: str
+        :param filter_field:
+        :type filter_field:
+        :param filter_value:
+        :type filter_value:
+        :param verbosity:
+        :type verbosity:
+        :return:
+        :rtype:
+        """
+        from warnings import warn
+        warn("This method is deprecated.  You should now use lookup_user_x_collection and provide it with a "
+             "CollectionParameters object to lookup a user_x value with a filter.")
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
-        str_id = self.preprocess_filter(str(filter_value))
+        str_id = ResourceParameters._preprocess_filter(str(filter_value))
 
         params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
         req = requests.Request('GET', user_x_url, params=params)
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Collection(response)
 
-    def lookup_user_x_guid_with_filter(self, tc_number, filter_field, filter_value) -> str:
+    def lookup_user_x(self, tc_number: str, guid: str,
+                      resource_parameters: ResourceParameters = None) -> AlliantApiResponse:
+        """
+        Lookup a transaction characteristic
 
-        response = self.lookup_user_x_with_filter(tc_number, filter_field, filter_value, verbosity='minimal')
-
-        return response.guids[0]
-
-    def lookup_user_x(self, tc_number, guid, verbosity='default') -> AlliantApiResponse:
+        :param tc_number: the number relating to the TC being referenced. 1-20
+        :type tc_number: str
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
+        :param resource_parameters: an instance of the ResourceParameters class that contains the parameters to be
+        passed
+        :type resource_parameters: ResourceParameters
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
-        params = verbosity
+        params = resource_parameters.parameter_string()
 
         req = requests.Request('GET', user_x_url + '/' + guid, params=params)
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
-    def patch_user_x(self, tc_number, guid, body, verbosity='default') -> AlliantApiResponse:
+    def patch_user_x(self, tc_number: str, guid: str, body: dict,
+                     resource_parameters: ResourceParameters = None) -> AlliantApiResponse:
+        """
+        Perform a partial update on a transaction characteristic
+
+        :param tc_number: the number relating to the TC being referenced. 1-20
+        :type tc_number: str
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
+        :param body: the body of the request to send.  This contains the fields to be updated
+        :type body: dict
+        :param resource_parameters: an instance of the ResourceParameters class that contains the parameters to be
+        passed
+        :type resource_parameters: ResourceParameters
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
 
         user_x_url = self.user_x_url_base + str(tc_number) + '/' + guid
 
-        params = verbosity
+        params = resource_parameters.parameter_string()
 
         req = requests.Request('PUT', user_x_url, json=body, params=params)
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
-    def create_user_x(self, tc_number: str, body: dict, verbosity='default') -> AlliantApiResponse:
+    def create_user_x(self, tc_number: str, body: dict,
+                      resource_parameters: ResourceParameters = None) -> AlliantApiResponse:
+        """
+        Create a transaction characteristic item
+
+        :param tc_number: the number relating to the TC being referenced. 1-20
+        :type tc_number: str
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
+        :param body: the body of the request to send.  This contains the fields to be created
+        :type body: dict
+        :param resource_parameters: an instance of the ResourceParameters class that contains the parameters to be
+        passed
+        :type resource_parameters: ResourceParameters
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
-        params = verbosity
+        params = resource_parameters.parameter_string()
 
         req = requests.Request('POST', user_x_url, json=body, params=params)
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
@@ -293,9 +380,45 @@ class Client:
     #
     #################################################################################################
 
-    def lookup_adjustment_with_filter(self, filter_field, filter_value, verbosity='default') -> Collection:
+    def lookup_adjustment_collection(self, collection_parameters: CollectionParameters = None) -> Collection:
+        """
+        Lookup a collection for Adjustments.  Supply the collection parameters you would like applied to the response.
 
-        str_id = self.preprocess_filter(str(filter_value))
+        :param collection_parameters: an instance of the CollectionParameters class that contains the parameters to be
+        passed
+        :type collection_parameters: CollectionParameters
+        :return: Collection
+        :rtype: Collection
+        """
+
+        params = collection_parameters.parameter_string()
+
+        req = requests.Request('GET', self.adjustment_headers_url, params=params)
+
+        response = self._send_request(req)
+
+        return Collection(response)
+
+    def lookup_adjustment_with_filter(self, filter_field, filter_value, verbosity='default') -> Collection:
+        # todo: remove this method
+        """
+        This method is deprecated.  You should now use lookup_adjustment_collection and provide it with a
+        CollectionParameters object to lookup a user_x value with a filter."
+        :param filter_field:
+        :type filter_field:
+        :param filter_value:
+        :type filter_value:
+        :param verbosity:
+        :type verbosity:
+        :return:
+        :rtype:
+        """
+
+        from warnings import warn
+        warn("This method is deprecated.  You should now use lookup_adjustment_collection and provide it with a "
+             "CollectionParameters object to lookup a user_x value with a filter.")
+
+        str_id = ResourceParameters._preprocess_filter(str(filter_value))
 
         params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
@@ -304,47 +427,63 @@ class Client:
                                params=params
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Collection(response)
 
-    def lookup_adjustment_guid_with_filter(self, filter_field, filter_value) -> str:
+    def lookup_adjustment(self, guid, resource_parameters: ResourceParameters = None) -> Adjustment:
+        """
 
-        response = self.lookup_adjustment_with_filter(filter_field, filter_value, verbosity='minimal')
-
-        return response.guids[0]
-
-    def lookup_adjustment(self, guid, verbosity='default') -> Adjustment:
-
-        params = verbosity
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
+        :param resource_parameters: an instance of the ResourceParameters class that contains the parameters to be
+        passed
+        :type resource_parameters: ResourceParameters
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
+        params = resource_parameters.parameter_string()
 
         req = requests.Request('GET',
                                self.adjustment_headers_url + '/' + guid,
                                params=params
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Adjustment(response)
 
-    def delete_adjustment(self, guid):
+    def delete_adjustment(self, guid: str) -> AlliantApiResponse:
+        """
+        Delete the referenced adjustment, provided it has been cleared or not yet posted.
+
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
 
         req = requests.Request('DELETE',
                                self.adjustment_headers_url + '/' + guid,
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
     def adjustment_action(self, guid: str, action: str, comment: str = None) -> AlliantApiResponse:
         """
+        Perform a lifecycle action on a specific adjustment
 
-        :param guid: This is the guid of the resource
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
         :param action: The action to be performed.  available actions are: approve, clear, clearRequest, copy,
             insetup, post
+        :type action: str
         :param comment: some of the actions require a comment, if required, this should be entered here.
-        :return:
+        :type comment: str
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
         """
 
         available_actions = ['approve', 'clear', 'clearRequest', 'copy', 'insetup', 'post', 'complete']
@@ -370,7 +509,7 @@ class Client:
                                    action_url,
                                    )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
@@ -382,7 +521,7 @@ class Client:
 
     def lookup_contract_with_filter(self, filter_field, filter_value, verbosity='default') -> Collection:
 
-        str_id = self.preprocess_filter(str(filter_value))
+        str_id = ResourceParameters._preprocess_filter(str(filter_value))
 
         params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
@@ -391,7 +530,7 @@ class Client:
                                params=params
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Collection(response)
 
@@ -410,7 +549,7 @@ class Client:
                                params=params
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Contract(response)
 
@@ -428,7 +567,7 @@ class Client:
                                self.contracts_url + '/' + guid,
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
@@ -468,7 +607,7 @@ class Client:
                                    action_url,
                                    )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
@@ -480,7 +619,7 @@ class Client:
 
     def lookup_contact_with_filter(self, filter_field, filter_value, verbosity='default') -> Collection:
 
-        str_id = self.preprocess_filter(str(filter_value))
+        str_id = ResourceParameters._preprocess_filter(str(filter_value))
 
         params = f"{verbosity}&$filter={filter_field} eq+'{str_id}'"
 
@@ -489,7 +628,7 @@ class Client:
                                params=params
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Collection(response)
 
@@ -508,7 +647,7 @@ class Client:
                                params=params
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
@@ -521,7 +660,7 @@ class Client:
                                params=params
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return Collection(response)
 
@@ -531,17 +670,20 @@ class Client:
                                self.contacts_url + '/' + guid,
                                )
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
         return AlliantApiResponse(response)
 
     def reset_metadata(self):
+        """
+        Clears out cache and resets metadata.  This can be required after certain configuration changes
+
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
 
         req = requests.Request('POST', self.metadata_reset)
 
-        response = self.send_request(req)
+        response = self._send_request(req)
 
-        return Contract(response)
-
-
-
+        return AlliantApiResponse(response)

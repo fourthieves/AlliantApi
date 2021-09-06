@@ -6,7 +6,7 @@ requires = [
 
 setup(
     name='alliantapi',
-    version='0.1',
+    version='0.0.1',
     packages=['alliantapi'],
     url='https://github.com/fourthieves/AlliantApi',
     license='',
