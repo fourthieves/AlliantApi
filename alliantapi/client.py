@@ -193,38 +193,40 @@ class Client:
 
         response = self.session.send(prepped)
 
-        while response.status_code in self.error_codes_to_retry:
-            retried_count += 1
-            logging.warning(
-                f"Retrying API Call - Attempt {retried_count}\n"
-                f"  {response.status_code = }\n"
-                f"  {response.request.method = }\n"
-                f"  {response.request.url = }\n"
-                f"  {response.request.body = }\n"
-                f"  {response.text = }\n"
-                f"  failed header - {response.request.headers = }\n"
-            )
+        if self.number_of_retries > 0:
+            while response.status_code in self.error_codes_to_retry:
+                retried_count += 1
+                logging.warning(
+                    f"Retrying API Call - Attempt {retried_count}\n"
+                    f"  {response.status_code = }\n"
+                    f"  {response.request.method = }\n"
+                    f"  {response.request.url = }\n"
+                    f"  {response.request.body = }\n"
+                    f"  {response.text = }\n"
+                    f"  failed header - {response.request.headers = }\n"
+                )
 
-            time.sleep(retry_time)
-            self.login()
-            time.sleep(1)
+                time.sleep(retry_time)
+                self.logout()
+                self.login()
+                time.sleep(1)
 
-            prepped = self.session.prepare_request(req)
-            response = self.session.send(prepped)
+                prepped = self.session.prepare_request(req)
+                response = self.session.send(prepped)
 
-            if retried_count == self.number_of_retries:
-                if response.status_code in self.error_codes_to_retry:
-                    logging.error("Finished retrying - call not made successfully\n"
-                                  f"  {response.status_code = }\n"
-                                  f"  {response.request.method = }\n"
-                                  f"  {response.request.url = }\n"
-                                  f"  {response.request.body = }\n"
-                                  f"  {response.text = }\n"
-                                  f"  failed header - {response.request.headers = }\n"
-                                  )
-                break
+                if retried_count == self.number_of_retries:
+                    if response.status_code in self.error_codes_to_retry:
+                        logging.error("Finished retrying - call not made successfully\n"
+                                      f"  {response.status_code = }\n"
+                                      f"  {response.request.method = }\n"
+                                      f"  {response.request.url = }\n"
+                                      f"  {response.request.body = }\n"
+                                      f"  {response.text = }\n"
+                                      f"  failed header - {response.request.headers = }\n"
+                                      )
+                    break
 
-            retry_time = retry_time * self.retry_backoff
+                retry_time = retry_time * self.retry_backoff
 
         return response
 
