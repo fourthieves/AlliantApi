@@ -1,3 +1,4 @@
+from typing import List
 
 __all__ = [
     'ResourceParameters',
@@ -9,8 +10,8 @@ class ResourceParameters:
 
     def __init__(self,
                  verbosity: str = None,
-                 include: list[str] = None,
-                 exclude: list[str] = None):
+                 include: List[str] = None,
+                 exclude: List[str] = None):
         """
         This class houses details of parameters that can be passed when the expected response is a resource
 
@@ -63,8 +64,8 @@ class CollectionParameters(ResourceParameters):
 
     def __init__(self,
                  verbosity: str = None,
-                 include: list[str] = None,
-                 exclude: list[str] = None,
+                 include: List[str] = None,
+                 exclude: List[str] = None,
                  top: int = None,
                  skip: int = None,
                  order_by_field: str = None,
