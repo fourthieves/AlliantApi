@@ -237,7 +237,8 @@ class Client:
     #################################################################################################
 
     def lookup_user_x_collection(self, tc_number: str,
-                                 collection_parameters: CollectionParameters = None) -> Collection:
+                                 collection_parameters: CollectionParameters = CollectionParameters(None)
+                                 ) -> Collection:
         """
         Lookup a collection for a Transaction Characteristic.  Supply the number of the TC you would like to interact
         with and collection parameters you would like applied to the response.
@@ -349,7 +350,7 @@ class Client:
         return AlliantApiResponse(response)
 
     def create_user_x(self, tc_number: str, body: dict,
-                      resource_parameters: ResourceParameters = None) -> AlliantApiResponse:
+                      resource_parameters: ResourceParameters = ResourceParameters(None)) -> AlliantApiResponse:
         """
         Create a transaction characteristic item
 
@@ -382,7 +383,7 @@ class Client:
     #
     #################################################################################################
 
-    def lookup_adjustment_collection(self, collection_parameters: CollectionParameters = None) -> Collection:
+    def lookup_adjustment_collection(self, collection_parameters: CollectionParameters = CollectionParameters(None)) -> Collection:
         """
         Lookup a collection for Adjustments.  Supply the collection parameters you would like applied to the response.
 
@@ -433,7 +434,7 @@ class Client:
 
         return Collection(response)
 
-    def lookup_adjustment(self, guid, resource_parameters: ResourceParameters = None) -> Adjustment:
+    def lookup_adjustment(self, guid, resource_parameters: ResourceParameters = ResourceParameters(None)) -> Adjustment:
         """
 
         :param guid: the guid for the resource you are referencing
