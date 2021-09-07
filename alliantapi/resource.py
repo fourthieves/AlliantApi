@@ -112,7 +112,7 @@ class AlliantApi(Client):
 
         response = self.lookup_contract(guid)
         contract_id = response.result['id']
-        logging.info(f"The initial contract status for {contract_id} is {response.contract_status}")
+        logging.info(f"{contract_id} initial contract status is {response.contract_status}")
 
         if response.contract_status in ('In Revision', 'In Setup'):
             self.contract_action(guid, 'complete')
@@ -123,5 +123,5 @@ class AlliantApi(Client):
             if response:
                 response = self.lookup_contract(guid)
 
-        logging.info(f"The final contract status for {contract_id} is {response.contract_status}")
+        logging.info(f"{contract_id} final contract status is {response.contract_status}")
         return response
