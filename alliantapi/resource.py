@@ -125,3 +125,36 @@ class AlliantApi(Client):
 
         logging.info(f"{contract_id} final contract status is {response.contract_status}")
         return response
+
+    def complete_approve_post_adjustment(self, guid: str, approve_message: str) -> AlliantApiResponse:
+        """
+        Takes an adjustment through the complete, approval, and posting stages of contract lifecycle
+
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
+        :param approve_message: The approval message to be used
+        :type approve_message: str
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
+
+        response = self.lookup_adjustment(guid)
+        adjustment_descr = response.result['description']
+        logging.info(f"{adjustment_descr} initial adjustment status is {response.adjustment_status}")
+
+        if response.adjustment_status in ('In Setup'):
+            self.adjustment_action(guid, 'complete')
+            response = self.lookup_adjustment(guid)
+
+        if response.adjustment_status  == 'Complete':
+            response = self.adjustment_action(guid, 'approve', approve_message)
+            if response:
+                response = self.lookup_adjustment(guid)
+
+        if response.adjustment_status  == 'Approved':
+            response = self.adjustment_action(guid, 'post', approve_message)
+            if response:
+                response = self.lookup_adjustment(guid)
+
+        logging.info(f"{adjustment_descr} final adjustment status is {response.adjustment_status}")
+        return response
