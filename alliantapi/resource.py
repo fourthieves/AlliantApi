@@ -1,6 +1,6 @@
 from .client import Client, get_system_layers, get_application_layers
 from.parameters import ResourceParameters, CollectionParameters
-from .alliant_api_response import AlliantApiResponse
+from .alliant_api_response import AlliantApiResponse, Contract
 import logging
 
 
@@ -98,7 +98,7 @@ class AlliantApi(Client):
 
         return f"{guid} - {response.contract_status} not deleted"
 
-    def complete_and_approve_contract(self, guid: str, approve_message: str) -> AlliantApiResponse:
+    def complete_and_approve_contract(self, guid: str, approve_message: str) -> Contract:
         """
         Takes a contract through the complete and approval stages of contract lifecycle
 
