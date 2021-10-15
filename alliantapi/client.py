@@ -230,6 +230,26 @@ class Client:
 
         return response
 
+    def _collection_lookup(self, url: str, collection_parameters: CollectionParameters = CollectionParameters(None)
+                           ) -> Collection:
+        """
+        Lookup a collection
+
+        :param collection_parameters: an instance of the CollectionParameters class that contains the parameters to be
+        passed
+        :type collection_parameters: CollectionParameters
+        :return: Collection
+        :rtype: Collection
+        """
+
+        params = collection_parameters.parameter_string()
+
+        req = requests.Request('GET', url, params=params)
+
+        response = self._send_request(req)
+
+        return Collection(response)
+
     #################################################################################################
     #
     #   TC Methods
@@ -254,13 +274,7 @@ class Client:
 
         user_x_url = self.user_x_url_base + str(tc_number)
 
-        params = collection_parameters.parameter_string()
-
-        req = requests.Request('GET', user_x_url, params=params)
-
-        response = self._send_request(req)
-
-        return Collection(response)
+        return self._collection_lookup(url=user_x_url, collection_parameters=collection_parameters)
 
     def lookup_user_x_with_filter(self, tc_number, filter_field, filter_value, verbosity='default') -> Collection:
         # todo: remove this method
@@ -522,6 +536,20 @@ class Client:
     #
     #################################################################################################
 
+    def lookup_contract_collection(self, collection_parameters: CollectionParameters = CollectionParameters(None)
+                                   ) -> Collection:
+        """
+        Lookup a contracts collection.
+
+        :param collection_parameters: an instance of the CollectionParameters class that contains the parameters to be
+        passed
+        :type collection_parameters: CollectionParameters
+        :return: Collection
+        :rtype: Collection
+        """
+
+        return self._collection_lookup(url=self.contracts_url, collection_parameters=collection_parameters)
+
     def lookup_contract_with_filter(self, filter_field, filter_value, verbosity='default') -> Collection:
 
         str_id = ResourceParameters._preprocess_filter(str(filter_value))
@@ -676,6 +704,10 @@ class Client:
         response = self._send_request(req)
 
         return AlliantApiResponse(response)
+
+    def add_contract_list(self, list_description: str) -> AlliantApiResponse:
+
+        pass
 
     def reset_metadata(self):
         """
