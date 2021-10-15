@@ -124,6 +124,7 @@ class Client:
         self.adjustment_headers_url = self.base_url + '/data/adjustmentHeaders'
         self.contacts_url = self.base_url + '/data/contacts'
         self.contracts_url = self.base_url + '/data/contracts'
+        self.contract_list_headers_url = self.base_url + '/data/contractListHeaders'
         self.metadata_reset = self.base_url + '/metadata/reset'
 
     def login(self) -> AlliantApiResponse:
@@ -682,18 +683,19 @@ class Client:
 
         return AlliantApiResponse(response)
 
-    def lookup_contact_collection(self, verbosity='default') -> Collection:
+    def lookup_contact_collection(self, collection_parameters: CollectionParameters = CollectionParameters(None)
+                                  ) -> Collection:
+        """
+        Lookup a contact collection.
 
-        params = verbosity
+        :param collection_parameters: an instance of the CollectionParameters class that contains the parameters to be
+        passed
+        :type collection_parameters: CollectionParameters
+        :return: Collection
+        :rtype: Collection
+        """
 
-        req = requests.Request('GET',
-                               self.contacts_url,
-                               params=params
-                               )
-
-        response = self._send_request(req)
-
-        return Collection(response)
+        return self._collection_lookup(url=self.contacts_url, collection_parameters=collection_parameters)
 
     def delete_contact(self, guid: str) -> AlliantApiResponse:
 
