@@ -125,7 +125,7 @@ class CollectionParameters(ResourceParameters):
         :rtype: STR
         """
 
-        return string.replace("'", r"\'").replace(' ', '+')
+        return string.replace(' ', '+')
 
     def parameter_string(self) -> str:
         """
