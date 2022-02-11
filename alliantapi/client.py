@@ -337,7 +337,7 @@ class Client:
         return AlliantApiResponse(response)
 
     def patch_user_x(self, tc_number: str, guid: str, body: dict,
-                     resource_parameters: ResourceParameters = None) -> AlliantApiResponse:
+                     resource_parameters: ResourceParameters = ResourceParameters(None)) -> AlliantApiResponse:
         """
         Perform a partial update on a transaction characteristic
 
