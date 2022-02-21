@@ -643,6 +643,33 @@ class Client:
 
         return AlliantApiResponse(response)
 
+    def patch_contract(self, guid: str, body: dict,
+                       resource_parameters: ResourceParameters = None) -> AlliantApiResponse:
+        """
+        Perform a partial update on a contract
+
+
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
+        :param body: the body of the request to send.  This contains the fields to be updated
+        :type body: dict
+        :param resource_parameters: an instance of the ResourceParameters class that contains the parameters to be
+        passed
+        :type resource_parameters: ResourceParameters
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
+
+        contract_url = self.contracts_url + '/' + guid
+
+        params = resource_parameters.parameter_string()
+
+        req = requests.Request('PUT', contract_url, json=body, params=params)
+
+        response = self._send_request(req)
+
+        return AlliantApiResponse(response)
+
     #################################################################################################
     #
     #   Contact Methods
