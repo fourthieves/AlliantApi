@@ -644,7 +644,7 @@ class Client:
         return AlliantApiResponse(response)
 
     def patch_contract(self, guid: str, body: dict,
-                       resource_parameters: ResourceParameters = None) -> AlliantApiResponse:
+                       resource_parameters: ResourceParameters = ResourceParameters(None)) -> AlliantApiResponse:
         """
         Perform a partial update on a contract
 
