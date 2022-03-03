@@ -4,6 +4,8 @@ import requests
 from .exceptions import *
 from .alliant_api_response import *
 from .parameters import CollectionParameters, ResourceParameters
+from .list_definitions import ListDefinition
+from typing import List
 
 #################################################################################################
 #
@@ -643,33 +645,6 @@ class Client:
 
         return AlliantApiResponse(response)
 
-    def patch_contract(self, guid: str, body: dict,
-                       resource_parameters: ResourceParameters = ResourceParameters(None)) -> AlliantApiResponse:
-        """
-        Perform a partial update on a contract
-
-
-        :param guid: the guid for the resource you are referencing
-        :type guid: str
-        :param body: the body of the request to send.  This contains the fields to be updated
-        :type body: dict
-        :param resource_parameters: an instance of the ResourceParameters class that contains the parameters to be
-        passed
-        :type resource_parameters: ResourceParameters
-        :return: AlliantApiResponse
-        :rtype: AlliantApiResponse
-        """
-
-        contract_url = self.contracts_url + '/' + guid
-
-        params = resource_parameters.parameter_string()
-
-        req = requests.Request('PUT', contract_url, json=body, params=params)
-
-        response = self._send_request(req)
-
-        return AlliantApiResponse(response)
-
     #################################################################################################
     #
     #   Contact Methods
@@ -734,9 +709,45 @@ class Client:
 
         return AlliantApiResponse(response)
 
-    def add_contract_list(self, list_description: str) -> AlliantApiResponse:
+    def list_contract_lists(self, collection_parameters: CollectionParameters = CollectionParameters(None)
+                            ) -> Collection:
+        """
+        Lookup a contract list collection.
 
-        pass
+        :param collection_parameters: an instance of the CollectionParameters class that contains the parameters to be
+        passed
+        :type collection_parameters: CollectionParameters
+        :return: Collection
+        :rtype: Collection
+        """
+
+        return self._collection_lookup(url=self.contract_list_headers_url, collection_parameters=collection_parameters)
+
+    def add_contract_list(self,
+                          list_description: str,
+                          list_definition: ListDefinition = ListDefinition(),
+                          include_only_common_items: bool = False,
+                          definition_text: str = None,
+                          collection_parameters: CollectionParameters = CollectionParameters(None),
+
+                          ) -> AlliantApiResponse:
+
+        params = collection_parameters.parameter_string()
+
+        body = list_definition.list_body(
+            action='add',
+            list_description=list_description,
+            list_detail_key='contractListDetails',
+            list_xrefs_key='contractListXrefs',
+            include_only_common_items=include_only_common_items,
+            definition_text=definition_text
+        )
+
+        req = requests.Request('POST', self.contract_list_headers_url, json=body, params=params)
+
+        response = self._send_request(req)
+
+        return AlliantApiResponse(response)
 
     def reset_metadata(self):
         """
