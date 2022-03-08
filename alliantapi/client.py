@@ -7,6 +7,7 @@ from .parameters import CollectionParameters, ResourceParameters
 from .list_definitions import ListDefinition
 from typing import List
 
+
 #################################################################################################
 #
 #   Global functions to support the module
@@ -394,13 +395,37 @@ class Client:
 
         return AlliantApiResponse(response)
 
+    def delete_user_x(self, tc_number: str, guid: str) -> AlliantApiResponse:
+        """
+        Delete a transaction characteristic item
+
+        :param tc_number: the number relating to the TC being referenced. 1-20
+        :type tc_number: str
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+
+        """
+
+        user_x_url = self.user_x_url_base + str(tc_number) + '/' + guid
+
+        req = requests.Request('DELETE',
+                               user_x_url,
+                               )
+
+        response = self._send_request(req)
+
+        return AlliantApiResponse(response)
+
     #################################################################################################
     #
     #   Adjustment Methods
     #
     #################################################################################################
 
-    def lookup_adjustment_collection(self, collection_parameters: CollectionParameters = CollectionParameters(None)) -> Collection:
+    def lookup_adjustment_collection(self, collection_parameters: CollectionParameters = CollectionParameters(None)) \
+            -> Collection:
         """
         Lookup a collection for Adjustments.  Supply the collection parameters you would like applied to the response.
 
