@@ -54,7 +54,7 @@ with alliantapi.AlliantApi(base_url,
                            application_layer=application_layer,
                            ) as aa:
 
-    # This produces 409 errors for contracts that can't be completed and retries won't help
+    # This produces 409 errors that can't be overcome and retries won't help
     aa.error_codes_to_retry.remove(409)
 
     kwargs_list = [{'tc_number': '1', 'guid': item['unique_identity']} for item in items]
