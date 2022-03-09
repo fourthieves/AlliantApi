@@ -140,6 +140,10 @@ class Client:
         """
 
         login_url = self.base_url + '/security/login'
+
+        if self.token:
+            self.logout()
+
         response = requests.post(
             login_url,
             params={
@@ -180,6 +184,8 @@ class Client:
         )
 
         logging.info("Logged out")
+        self.token = None
+
         return AlliantApiResponse(response)
 
     def _send_request(self, req) -> requests.Response:
