@@ -35,7 +35,7 @@ SELECT [unique_identity]  , udkey_1_id
   AND udkey_1_id NOT IN('Untitled', 'Unspecified')
 """
 
-print(sql)
+logging.info('Executing SQL')
 
 cnxn = pyodbc.connect(connection_string)
 cursor = cnxn.cursor()
@@ -46,6 +46,8 @@ items = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 cursor.close()
 cnxn.close()
+
+logging.info('Query Complete')
 
 with alliantapi.AlliantApi(base_url,
                            user_id=username,
@@ -59,7 +61,7 @@ with alliantapi.AlliantApi(base_url,
 
     kwargs_list = [{'tc_number': '1', 'guid': item['unique_identity']} for item in items]
 
-    print(len(kwargs_list))
+    logging.info(len(kwargs_list))
 
     with concurrent.futures.ThreadPoolExecutor(number_of_threads_to_run) as executor:
 
