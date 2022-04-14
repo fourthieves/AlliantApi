@@ -380,8 +380,6 @@ class Client:
 
         :param tc_number: the number relating to the TC being referenced. 1-20
         :type tc_number: str
-        :param guid: the guid for the resource you are referencing
-        :type guid: str
         :param body: the body of the request to send.  This contains the fields to be created
         :type body: dict
         :param resource_parameters: an instance of the ResourceParameters class that contains the parameters to be
@@ -796,6 +794,54 @@ class Client:
 
         return self._collection_lookup(url=self.contacts_url, collection_parameters=collection_parameters)
 
+    def patch_contact(self, guid: str, body: dict,
+                      resource_parameters: ResourceParameters = ResourceParameters(None)) -> AlliantApiResponse:
+        """
+        Perform a partial update on a contact
+
+        :param guid: the guid for the resource you are referencing
+        :type guid: str
+        :param body: the body of the request to send.  This contains the fields to be updated
+        :type body: dict
+        :param resource_parameters: an instance of the ResourceParameters class that contains the parameters to be
+        passed
+        :type resource_parameters: ResourceParameters
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
+
+        contacts_url = self.contacts_url + '/' + guid,
+
+        params = resource_parameters.parameter_string()
+
+        req = requests.Request('PUT', contacts_url, json=body, params=params)
+
+        response = self._send_request(req)
+
+        return AlliantApiResponse(response)
+
+    def create_contact(self, body: dict,
+                       resource_parameters: ResourceParameters = ResourceParameters(None)) -> AlliantApiResponse:
+        """
+        Create a contact item
+
+        :param body: the body of the request to send.  This contains the fields to be created
+        :type body: dict
+        :param resource_parameters: an instance of the ResourceParameters class that contains the parameters to be
+        passed
+        :type resource_parameters: ResourceParameters
+        :return: AlliantApiResponse
+        :rtype: AlliantApiResponse
+        """
+
+        params = resource_parameters.parameter_string()
+
+        req = requests.Request('POST', self.contacts_url, json=body, params=params)
+
+        response = self._send_request(req)
+
+        return AlliantApiResponse(response)
+
     def delete_contact(self, guid: str) -> AlliantApiResponse:
 
         req = requests.Request('DELETE',
@@ -805,8 +851,6 @@ class Client:
         response = self._send_request(req)
 
         return AlliantApiResponse(response)
-
-
 
     def reset_metadata(self):
         """
