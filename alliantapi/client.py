@@ -702,6 +702,46 @@ class Client:
 
         return AlliantApiResponse(response)
 
+    def list_contract_lists(self, collection_parameters: CollectionParameters = CollectionParameters(None)
+                            ) -> Collection:
+        """
+        Lookup a contract list collection.
+
+        :param collection_parameters: an instance of the CollectionParameters class that contains the parameters to be
+        passed
+        :type collection_parameters: CollectionParameters
+        :return: Collection
+        :rtype: Collection
+        """
+
+        return self._collection_lookup(url=self.contract_list_headers_url, collection_parameters=collection_parameters)
+
+    def add_contract_list(self,
+                          list_description: str,
+                          list_definition: ListDefinition = ListDefinition(),
+                          include_only_common_items: bool = False,
+                          definition_text: str = None,
+                          collection_parameters: CollectionParameters = CollectionParameters(None),
+
+                          ) -> AlliantApiResponse:
+
+        params = collection_parameters.parameter_string()
+
+        body = list_definition.list_body(
+            action='add',
+            list_description=list_description,
+            list_detail_key='contractListDetails',
+            list_xrefs_key='contractListXrefs',
+            include_only_common_items=include_only_common_items,
+            definition_text=definition_text
+        )
+
+        req = requests.Request('POST', self.contract_list_headers_url, json=body, params=params)
+
+        response = self._send_request(req)
+
+        return AlliantApiResponse(response)
+
     #################################################################################################
     #
     #   Contact Methods
@@ -766,45 +806,7 @@ class Client:
 
         return AlliantApiResponse(response)
 
-    def list_contract_lists(self, collection_parameters: CollectionParameters = CollectionParameters(None)
-                            ) -> Collection:
-        """
-        Lookup a contract list collection.
 
-        :param collection_parameters: an instance of the CollectionParameters class that contains the parameters to be
-        passed
-        :type collection_parameters: CollectionParameters
-        :return: Collection
-        :rtype: Collection
-        """
-
-        return self._collection_lookup(url=self.contract_list_headers_url, collection_parameters=collection_parameters)
-
-    def add_contract_list(self,
-                          list_description: str,
-                          list_definition: ListDefinition = ListDefinition(),
-                          include_only_common_items: bool = False,
-                          definition_text: str = None,
-                          collection_parameters: CollectionParameters = CollectionParameters(None),
-
-                          ) -> AlliantApiResponse:
-
-        params = collection_parameters.parameter_string()
-
-        body = list_definition.list_body(
-            action='add',
-            list_description=list_description,
-            list_detail_key='contractListDetails',
-            list_xrefs_key='contractListXrefs',
-            include_only_common_items=include_only_common_items,
-            definition_text=definition_text
-        )
-
-        req = requests.Request('POST', self.contract_list_headers_url, json=body, params=params)
-
-        response = self._send_request(req)
-
-        return AlliantApiResponse(response)
 
     def reset_metadata(self):
         """
