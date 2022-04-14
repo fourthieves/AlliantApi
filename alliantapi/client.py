@@ -604,7 +604,7 @@ class Client:
         return response.guids[0]
 
     def patch_contract(self, guid: str, body: dict,
-                       resource_parameters: ResourceParameters = ResourceParameters(None)) -> ~Contract:
+                       resource_parameters: ResourceParameters = ResourceParameters(None)) -> Contract:
         """
         Perform a partial update on a contract
 
