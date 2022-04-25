@@ -601,10 +601,7 @@ class Client:
 
         response = self.lookup_contract_with_filter(filter_field, filter_value, verbosity='minimal')
 
-        if response.guids:
-            return response.guids[0]
-        else:
-            return None
+        return response.guids[0] if response.guids else None
 
     def patch_contract(self, guid: str, body: dict,
                        resource_parameters: ResourceParameters = ResourceParameters(None)) -> Contract:
@@ -768,10 +765,7 @@ class Client:
 
         response = self.lookup_contact_with_filter(filter_field, filter_value, verbosity='minimal')
 
-        if response.guids:
-            return response.guids[0]
-        else:
-            return None
+        return response.guids[0] if response.guids else None
 
     def lookup_contact(self, guid, verbosity='default') -> AlliantApiResponse:
 
