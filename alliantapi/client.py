@@ -810,7 +810,7 @@ class Client:
         :rtype: AlliantApiResponse
         """
 
-        contacts_url = self.contacts_url + '/' + guid,
+        contacts_url = self.contacts_url + '/' + guid
 
         params = resource_parameters.parameter_string()
 
