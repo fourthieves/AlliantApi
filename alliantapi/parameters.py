@@ -37,6 +37,18 @@ class ResourceParameters:
 
         return param_string
 
+    @staticmethod
+    def _preprocess_filter(string):
+        """
+        Reformats a string that will be used as a filter parameter
+        :param string: The string to be reformatted
+        :type string: str
+        :return:
+        :rtype: STR
+        """
+
+        return string.replace(' ', '+')
+
     def parameter_string(self) -> str:
         """
 
@@ -114,18 +126,6 @@ class CollectionParameters(ResourceParameters):
         self.filter_value = filter_value
         self.filter_operator = filter_operator
         self.filter_string = filter_string
-
-    @staticmethod
-    def _preprocess_filter(string):
-        """
-        Reformats a string that will be used as a filter parameter
-        :param string: The string to be reformatted
-        :type string: str
-        :return:
-        :rtype: STR
-        """
-
-        return string.replace(' ', '+')
 
     def parameter_string(self) -> str:
         """
