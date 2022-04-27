@@ -619,7 +619,7 @@ class Client:
         :rtype: AlliantApiResponse
         """
 
-        contract_url = self.contacts_url + '/' + guid
+        contract_url = self.contracts_url + '/' + guid
 
         params = resource_parameters.parameter_string()
 
