@@ -8,6 +8,7 @@ from pathlib import Path
 
 logging.basicConfig(
     filename=f"{Path(__file__).stem}.log",
+    filemode='a',
     level=logging.ERROR,
     format='%(asctime)s %(levelname)-8s %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S')
