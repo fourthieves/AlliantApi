@@ -203,6 +203,16 @@ class Client:
 
         response = self.session.send(prepped)
 
+        if not response.ok:
+            logging.error("Error in call\n"
+                          f"  {response.status_code = }\n"
+                          f"  {response.request.method = }\n"
+                          f"  {response.request.url = }\n"
+                          f"  {response.request.body = }\n"
+                          f"  {response.text = }\n"
+                          f"  failed header - {response.request.headers = }\n"
+                          )
+
         if self.number_of_retries > 0:
             while response.status_code in self.error_codes_to_retry:
                 retried_count += 1
